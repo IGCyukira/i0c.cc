@@ -1,4 +1,5 @@
 {
+  "$schema": "https://raw.githubusercontent.com/IGCyukira/i0c.cc/main/redirects.schema.json",
   "Slots": {
     "Main": {
       "/": { "type": "proxy", "target": "https://api.wenturc.com", "appendPath": false },
@@ -16,7 +17,7 @@
       "/w/n": { "type": "prefix", "target": "https://note.wenturc.com", "appendPath": true, "status": 302 },
       "/w/h": { "type": "prefix", "target": "https://hls.wenturc.com", "appendPath": true, "status": 302 },
       "/w/s": { "type": "exact", "target": "https://status.wenturc.com/status/all", "appendPath": false, "status": 302 },
-      "/w/p": { "type": "prefix", "target": "https://pixiv.wenturc.com", "appendPath": true, "status": "302" }
+      "/w/p": { "type": "prefix", "target": "https://pixiv.wenturc.com", "appendPath": true, "status": 302 }
     }
   }
 }

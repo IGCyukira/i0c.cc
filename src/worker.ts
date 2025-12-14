@@ -10,6 +10,7 @@ const CONFIG_URL = `https://raw.githubusercontent.com/${CONFIG_REPO}/${CONFIG_BR
 type RouteType = "prefix" | "exact" | "proxy";
 
 type RouteValue = string | RouteConfig;
+type RouteValueEntry = RouteValue | RouteValue[];
 
 interface RouteConfig {
   type?: string;
@@ -18,6 +19,7 @@ interface RouteConfig {
   url?: string;
   appendPath?: boolean;
   status?: number;
+  priority?: number;
 }
 
 interface NormalizedRule {
@@ -25,6 +27,7 @@ interface NormalizedRule {
   target: string;
   appendPath: boolean;
   status: number;
+  priority: number;
 }
 
 interface CompiledEntry {
@@ -33,6 +36,7 @@ interface CompiledEntry {
   regex: RegExp;
   names: string[];
   isParam: boolean;
+  order: number;
 }
 
 type SlotBranch = Record<string, unknown>;
@@ -72,7 +76,7 @@ const worker = {
       });
     }
 
-    const rawRules: Record<string, RouteValue> = {};
+    const rawRules: Record<string, RouteValueEntry> = {};
     flattenSlots(slotSource, rawRules);
 
     const compiledList = buildCompiledList(rawRules);
@@ -192,18 +196,31 @@ function getSlotSource(config: RedirectsConfig | null): SlotBranch | null {
   return isRecord(slotCandidate) ? slotCandidate : null;
 }
 
-function flattenSlots(source: SlotBranch, out: Record<string, RouteValue>): void {
+function flattenSlots(source: SlotBranch, out: Record<string, RouteValueEntry>): void {
   for (const [key, value] of Object.entries(source)) {
     if (key.startsWith("/")) {
-      out[key] = value as RouteValue;
+      const additions = coerceRouteValues(value);
+      if (!additions.length) {
+        continue;
+      }
+
+      const existing = out[key];
+      if (!existing) {
+        out[key] = additions.length === 1 ? additions[0] : additions;
+      } else {
+        const existingList = Array.isArray(existing) ? existing : [existing];
+        const combined = existingList.concat(additions);
+        out[key] = combined.length === 1 ? combined[0] : combined;
+      }
     } else if (isRecord(value)) {
       flattenSlots(value, out);
     }
   }
 }
 
-function buildCompiledList(rulesIn: Record<string, RouteValue>): CompiledEntry[] {
+function buildCompiledList(rulesIn: Record<string, RouteValueEntry>): CompiledEntry[] {
   const list: CompiledEntry[] = [];
+  let sequence = 0;
 
   for (const [rawKey, rawValue] of Object.entries(rulesIn)) {
     let base = rawKey.startsWith("/") ? rawKey : `/${rawKey}`;
@@ -211,22 +228,39 @@ function buildCompiledList(rulesIn: Record<string, RouteValue>): CompiledEntry[]
       base = base.slice(0, -1);
     }
 
-    const rule = normaliseRule(rawValue);
-    if (!rule) {
-      continue;
-    }
+    const values = toRouteArray(rawValue);
+    let fallbackPriority = 0;
 
-    const compiled = compilePattern(base);
-    list.push({ base, rule, ...compiled });
+    for (const entry of values) {
+      fallbackPriority += 1;
+      const rule = normaliseRule(entry, fallbackPriority);
+      if (!rule) {
+        continue;
+      }
+
+      const compiled = compilePattern(base);
+      list.push({ base, rule, ...compiled, order: sequence });
+      sequence += 1;
+    }
   }
 
-  list.sort((a, b) => b.base.length - a.base.length);
+  list.sort((a, b) => {
+    if (b.base.length !== a.base.length) {
+      return b.base.length - a.base.length;
+    }
+
+    if (a.rule.priority !== b.rule.priority) {
+      return a.rule.priority - b.rule.priority;
+    }
+
+    return a.order - b.order;
+  });
   return list;
 }
 
-function normaliseRule(value: RouteValue): NormalizedRule | null {
+function normaliseRule(value: RouteValue, fallbackPriority: number): NormalizedRule | null {
   if (typeof value === "string") {
-    return { type: "prefix", target: value, appendPath: true, status: DEFAULT_STATUS };
+    return { type: "prefix", target: value, appendPath: true, status: DEFAULT_STATUS, priority: fallbackPriority };
   }
 
   if (value && typeof value === "object") {
@@ -235,14 +269,44 @@ function normaliseRule(value: RouteValue): NormalizedRule | null {
     const appendPath = value.appendPath !== undefined ? Boolean(value.appendPath) : true;
     const parsedStatus = Number(value.status);
     const status = Number.isFinite(parsedStatus) ? parsedStatus : DEFAULT_STATUS;
+    const parsedPriority = Number((value as RouteConfig).priority);
+    const priority = Number.isFinite(parsedPriority) ? parsedPriority : fallbackPriority;
 
-    return { type, target, appendPath, status };
+    return { type, target, appendPath, status, priority };
   }
 
   return null;
 }
 
-function compilePattern(pattern: string): Omit<CompiledEntry, "base" | "rule"> {
+function toRouteArray(entry: RouteValueEntry): RouteValue[] {
+  return Array.isArray(entry) ? entry : [entry];
+}
+
+function coerceRouteValues(input: unknown): RouteValue[] {
+  if (Array.isArray(input)) {
+    const result: RouteValue[] = [];
+    for (const item of input) {
+      if (typeof item === "string") {
+        result.push(item);
+      } else if (isRecord(item)) {
+        result.push(item as RouteConfig);
+      }
+    }
+    return result;
+  }
+
+  if (typeof input === "string") {
+    return [input];
+  }
+
+  if (isRecord(input)) {
+    return [input as RouteConfig];
+  }
+
+  return [];
+}
+
+function compilePattern(pattern: string): Pick<CompiledEntry, "regex" | "names" | "isParam"> {
   if (pattern === "/") {
     return { regex: /^\/$/, names: [], isParam: false };
   }

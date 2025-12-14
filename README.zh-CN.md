@@ -17,6 +17,17 @@ Cloudflare Worker 脚本：特点是强制 HTTPS、返回 favicon，并基于远
 - `proxy` 类型会把请求透传至目标并回传对方响应，其余类型返回 `Location` 重定向。
 - 若需要为同一路径配置多条规则，可将值写成数组，数组顺序决定默认优先级，也可通过 `priority` 字段显式指定。数字越小越先匹配。
 
+提示：在文件顶部添加下面的 Schema 引用，就能在支持的编辑器里获得自动补全和校验（Schema 放在 main 分支，即使 `redirects.json` 在 data 分支也能生效）：
+
+```jsonc
+{
+  "$schema": "https://raw.githubusercontent.com/IGCyukira/i0c.cc/main/redirects.schema.json",
+  "Slots": {
+    // ...
+  }
+}
+```
+
 ## 示例 `redirects.json`
 
 ```jsonc

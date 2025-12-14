@@ -17,6 +17,17 @@ Provide a `Slots` (or `slots` / `SLOT`) object in `redirects.json` to define all
 - The `proxy` type forwards the request to the destination and returns the upstream response; other types respond with a `Location` redirect.
 - To configure multiple rules for the same path, provide an array. Array order controls the default priority, or you can specify `priority` explicitly. Smaller numbers match earlier.
 
+Tip: add the schema reference below to unlock autocomplete and validation in supporting editors (the schema lives on `main`, so it still applies if the JSON sits in a data branch):
+
+```jsonc
+{
+  "$schema": "https://raw.githubusercontent.com/IGCyukira/i0c.cc/main/redirects.schema.json",
+  "Slots": {
+    // ...
+  }
+}
+```
+
 ## Sample `redirects.json`
 
 ```jsonc

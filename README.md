@@ -1,4 +1,6 @@
-# Quick Configuration Reference
+Cloudflare Worker script: enforces HTTPS, serves a favicon, and applies redirect or proxy rules defined in a remote redirects.json file.
+
+# `redirects.json` Quick Reference
 
 Provide a `Slots` (or `slots` / `SLOT`) object in `redirects.json` to define all routing rules. The table below lists the available fields for each route:
 
@@ -91,4 +93,4 @@ Provide a `Slots` (or `slots` / `SLOT`) object in `redirects.json` to define all
 
 After you commit the file, the Worker automatically applies these redirect and proxy rules.
 
-For the Chinese version, see [README.zh.md](README.zh.md).
+For the Chinese version, see [README.zh-CN.md](README.zh-CN.md).

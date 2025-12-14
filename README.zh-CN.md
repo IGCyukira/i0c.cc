@@ -1,4 +1,6 @@
-# 配置速查
+Cloudflare Worker 脚本：特点是强制 HTTPS、返回 favicon，并基于远程 redirects.json 中的规则执行重定向或代理。
+
+# `redirects.json` 配置速查
 
 在 `redirects.json` 中提供 `Slots`（或 `slots` / `SLOT`）对象即可定义所有规则。下表列出每条路由可用字段：
 

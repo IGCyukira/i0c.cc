@@ -1,7 +1,7 @@
 {
   "Slots": {
     "Main": {
-      "/": { "type": "exact", "target": "https://api.wenturc.com", "appendPath": false, "status": 302 },
+      "/": { "type": "proxy", "target": "https://api.wenturc.com", "appendPath": false },
       "/w": { "type": "prefix", "target": "https://wenturc.com", "appendPath": true, "status": 302 },
       "/i": { "type": "prefix", "target": "https://igcrystal.icu", "appendPath": false, "status": 302 },
       "/i/b": { "type": "exact", "target": "https://blog.igcrystal.icu", "appendPath": true, "status": 302 }
@@ -20,3 +20,4 @@
     }
   }
 }
+

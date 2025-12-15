@@ -1,11 +1,91 @@
-import { base64Icon } from "./favicon";
+import { base64Icon } from "../assets/favicon";
 
-declare const caches: CacheStorage & { default: Cache };
+declare const process: undefined | { env?: Record<string, string | undefined> };
+declare const Deno: undefined | { env?: { get?(key: string): string | undefined } };
 
-const CONFIG_REPO = "IGCyukira/i0c.cc";
-const CONFIG_BRANCH = "data";
-const CONFIG_PATH = "redirects.json";
-const CONFIG_URL = `https://raw.githubusercontent.com/${CONFIG_REPO}/${CONFIG_BRANCH}/${CONFIG_PATH}`;
+function readEnvVar(key: string): string | undefined {
+  if (typeof process !== "undefined" && process?.env) {
+    const value = process.env[key];
+    if (typeof value === "string" && value.length > 0) {
+      return value;
+    }
+  }
+
+  if (typeof Deno !== "undefined" && typeof Deno?.env?.get === "function") {
+    try {
+      const value = Deno.env.get(key);
+      if (typeof value === "string" && value.length > 0) {
+        return value;
+      }
+    } catch {
+      // Deno Deploy may forbid env access; ignore silently.
+    }
+  }
+
+  if (typeof globalThis === "object" && globalThis) {
+    const raw = (globalThis as Record<string, unknown>)[key];
+    if (typeof raw === "string" && raw.length > 0) {
+      return raw;
+    }
+  }
+
+  return undefined;
+}
+
+function readEnvPriority(keys: string[]): string | undefined {
+  for (const key of keys) {
+    const value = readEnvVar(key);
+    if (value) {
+      return value;
+    }
+  }
+  return undefined;
+}
+
+function readBindingVar(bindings: Record<string, unknown> | undefined, key: string): string | undefined {
+  if (!bindings) {
+    return undefined;
+  }
+
+  const raw = bindings[key];
+  return typeof raw === "string" && raw.length > 0 ? raw : undefined;
+}
+
+const ENV_CONFIG_REPO = readEnvPriority(["REDIRECTS_CONFIG_REPO", "CONFIG_REPO"]);
+const ENV_CONFIG_BRANCH = readEnvPriority(["REDIRECTS_CONFIG_BRANCH", "CONFIG_BRANCH"]);
+const ENV_CONFIG_PATH = readEnvPriority(["REDIRECTS_CONFIG_PATH", "CONFIG_PATH"]);
+const CONFIG_REPO = ENV_CONFIG_REPO ?? "IGCyukira/i0c.cc";
+const CONFIG_BRANCH = ENV_CONFIG_BRANCH ?? "data";
+const CONFIG_PATH = ENV_CONFIG_PATH ?? "redirects.json";
+
+export function buildConfigUrl(parts?: { repo?: string; branch?: string; path?: string }): string {
+  const repo = parts?.repo ?? CONFIG_REPO;
+  const branch = parts?.branch ?? CONFIG_BRANCH;
+  const path = parts?.path ?? CONFIG_PATH;
+  return `https://raw.githubusercontent.com/${repo}/${branch}/${path}`;
+}
+
+const ENV_CONFIG_URL = readEnvPriority(["REDIRECTS_CONFIG_URL", "CONFIG_URL"]);
+export const DEFAULT_CONFIG_URL = ENV_CONFIG_URL ?? buildConfigUrl();
+
+export function resolveConfigUrlFromBindings(bindings?: Record<string, unknown>): string | undefined {
+  if (bindings && typeof bindings === "object") {
+    const direct = readBindingVar(bindings, "REDIRECTS_CONFIG_URL") ?? readBindingVar(bindings, "CONFIG_URL");
+    if (direct) {
+      return direct;
+    }
+
+    const repo = readBindingVar(bindings, "REDIRECTS_CONFIG_REPO") ?? readBindingVar(bindings, "CONFIG_REPO");
+    const branch = readBindingVar(bindings, "REDIRECTS_CONFIG_BRANCH") ?? readBindingVar(bindings, "CONFIG_BRANCH");
+    const path = readBindingVar(bindings, "REDIRECTS_CONFIG_PATH") ?? readBindingVar(bindings, "CONFIG_PATH");
+
+    if (repo || branch || path) {
+      return buildConfigUrl({ repo: repo ?? undefined, branch: branch ?? undefined, path: path ?? undefined });
+    }
+  }
+
+  return ENV_CONFIG_URL ?? undefined;
+}
 
 type RouteType = "prefix" | "exact" | "proxy";
 
@@ -51,65 +131,183 @@ interface RedirectsConfig {
 const HTTPS_REDIRECT_STATUS = 308;
 const DEFAULT_STATUS = 302;
 const HSTS_HEADER_VALUE = "max-age=63072000; includeSubDomains";
+const DEFAULT_CACHE_TTL_SECONDS = 3600;
 
-const worker = {
-  async fetch(request: Request): Promise<Response> {
-    const url = new URL(request.url);
-    let path = normalisePath(url.pathname || "/");
+interface MemoryCacheEntry {
+  text: string;
+  expiresAt: number;
+}
 
-    if (needsHttpsRedirect(url)) {
-      const hostname = url.hostname.startsWith("www.") ? url.hostname.replace(/^www\./, "") : url.hostname;
-      const destination = `https://${hostname}${url.pathname}${url.search}`;
-      return Response.redirect(destination, HTTPS_REDIRECT_STATUS);
-    }
+const memoryCache = new Map<string, MemoryCacheEntry>();
 
-    if (path === "/favicon.ico") {
-      return serveFavicon();
-    }
+export interface CacheLike {
+  match(request: Request): Promise<Response | undefined | null>;
+  put(request: Request, response: Response): Promise<void>;
+}
 
-    const redirectsConfig = await loadConfig(CONFIG_URL);
-    const slotSource = getSlotSource(redirectsConfig);
-    if (!slotSource) {
-      return new Response("503 No Slots configured", {
-        status: 503,
-        headers: { "Content-Type": "text/plain; charset=utf-8" }
-      });
-    }
+export interface HandlerOptions {
+  configUrl?: string;
+  cache?: CacheLike;
+  cacheTtlSeconds?: number;
+  fetchImpl?: typeof fetch;
+  fetchInit?: RequestInit;
+  waitUntil?(promise: Promise<unknown>): void;
+  now?: () => number;
+}
 
-    const rawRules: Record<string, RouteValueEntry> = {};
-    flattenSlots(slotSource, rawRules);
+interface ResolvedRuntime {
+  configUrl: string;
+  cache?: CacheLike;
+  cacheTtlSeconds: number;
+  fetchImpl: typeof fetch;
+  fetchInit?: RequestInit;
+  waitUntil?: (promise: Promise<unknown>) => void;
+  now: () => number;
+}
 
-    const compiledList = buildCompiledList(rawRules);
-    const decodedPath = safeDecode(path);
-    for (const item of compiledList) {
-      const { rule, regex, names, isParam, base } = item;
-      if (!rule.target) {
-        continue;
-      }
+export async function handleRedirectRequest(request: Request, options: HandlerOptions = {}): Promise<Response> {
+  const runtime = resolveRuntimeOptions(options);
+  const url = new URL(request.url);
+  const path = normalisePath(url.pathname || "/");
 
-      const match = decodedPath.match(regex);
-      if (match) {
-        const resolved = applyTemplate(rule.target, match, names);
-        const finalUrl = appendOriginalQuery(resolved, url.search);
-        return respondUsingRule(request, rule, finalUrl);
-      }
+  if (needsHttpsRedirect(url)) {
+    const hostname = url.hostname.startsWith("www.") ? url.hostname.replace(/^www\./, "") : url.hostname;
+    const destination = `https://${hostname}${url.pathname}${url.search}`;
+    return Response.redirect(destination, HTTPS_REDIRECT_STATUS);
+  }
 
-      if (rule.type === "prefix" && !isParam) {
-        const redirectTarget = resolvePrefixTarget(decodedPath, url.search, rule, base);
-        if (redirectTarget) {
-          return respondUsingRule(request, rule, redirectTarget);
-        }
-      }
-    }
+  if (path === "/favicon.ico") {
+    return serveFavicon();
+  }
 
-    return new Response("404 Not Found - 链接不存在", {
-      status: 404,
+  const redirectsConfig = await loadConfig(runtime);
+  const slotSource = getSlotSource(redirectsConfig);
+  if (!slotSource) {
+    return new Response("503 No Slots configured", {
+      status: 503,
       headers: { "Content-Type": "text/plain; charset=utf-8" }
     });
   }
-};
 
-export default worker;
+  const rawRules: Record<string, RouteValueEntry> = {};
+  flattenSlots(slotSource, rawRules);
+
+  const compiledList = buildCompiledList(rawRules);
+  const decodedPath = safeDecode(path);
+
+  for (const item of compiledList) {
+    const { rule, regex, names, isParam, base } = item;
+    if (!rule.target) {
+      continue;
+    }
+
+    const match = decodedPath.match(regex);
+    if (match) {
+      const resolved = applyTemplate(rule.target, match, names);
+      const finalUrl = appendOriginalQuery(resolved, url.search);
+      return respondUsingRule(request, rule, finalUrl, runtime);
+    }
+
+    if (rule.type === "prefix" && !isParam) {
+      const redirectTarget = resolvePrefixTarget(decodedPath, url.search, rule, base);
+      if (redirectTarget) {
+        return respondUsingRule(request, rule, redirectTarget, runtime);
+      }
+    }
+  }
+
+  return new Response("404 Not Found - 链接不存在", {
+    status: 404,
+    headers: { "Content-Type": "text/plain; charset=utf-8" }
+  });
+}
+
+function resolveRuntimeOptions(options: HandlerOptions): ResolvedRuntime {
+  const fetchImpl = options.fetchImpl ?? fetch;
+  const cacheTtlSeconds = options.cacheTtlSeconds ?? DEFAULT_CACHE_TTL_SECONDS;
+  const now = options.now ?? (() => Date.now());
+
+  return {
+    configUrl: options.configUrl ?? DEFAULT_CONFIG_URL,
+    cache: options.cache,
+    cacheTtlSeconds,
+    fetchImpl,
+    fetchInit: options.fetchInit,
+    waitUntil: options.waitUntil,
+    now
+  };
+}
+
+async function loadConfig(runtime: ResolvedRuntime): Promise<RedirectsConfig | null> {
+  const { configUrl, cache, cacheTtlSeconds, fetchImpl, fetchInit, now, waitUntil } = runtime;
+
+  const memo = memoryCache.get(configUrl);
+  if (memo && memo.expiresAt > now()) {
+    const parsed = safeParseJson<RedirectsConfig>(memo.text, "memory parse");
+    if (parsed) {
+      return parsed;
+    }
+  }
+
+  if (cache) {
+    try {
+      const cacheRequest = new Request(configUrl);
+      const cached = await cache.match(cacheRequest);
+      if (cached) {
+        const text = await cached.text();
+        const parsed = safeParseJson<RedirectsConfig>(text, "cached parse");
+        if (parsed) {
+          memoryCache.set(configUrl, { text, expiresAt: now() + cacheTtlSeconds * 1000 });
+          return parsed;
+        }
+      }
+    } catch (error) {
+      console.error("cache match err", error);
+    }
+  }
+
+  try {
+    const response = await fetchImpl(configUrl, fetchInit);
+    if (response && response.ok) {
+      const text = await response.text();
+      const parsed = safeParseJson<RedirectsConfig>(text, "config parse");
+      if (parsed) {
+        memoryCache.set(configUrl, { text, expiresAt: now() + cacheTtlSeconds * 1000 });
+        if (cache) {
+          const cacheResponse = new Response(text, {
+            headers: {
+              "Content-Type": "application/json",
+              "Cache-Control": `public, max-age=${cacheTtlSeconds}, s-maxage=${cacheTtlSeconds}`
+            }
+          });
+
+          const cacheRequest = new Request(configUrl);
+          const putPromise = cache.put(cacheRequest, cacheResponse);
+          if (waitUntil) {
+            waitUntil(putPromise.catch((error) => console.error("cache put err", error)));
+          } else {
+            await putPromise;
+          }
+        }
+        return parsed;
+      }
+    } else {
+      console.error("failed fetch config", response ? response.status : "no response");
+    }
+  } catch (error) {
+    console.error("load config err", error);
+  }
+
+  const fallback = memoryCache.get(configUrl);
+  if (fallback) {
+    const parsed = safeParseJson<RedirectsConfig>(fallback.text, "memory fallback");
+    if (parsed) {
+      return parsed;
+    }
+  }
+
+  return null;
+}
 
 function normalisePath(pathname: string): string {
   let normalised = pathname.replace(/\/{2,}/g, "/");
@@ -148,43 +346,6 @@ function serveFavicon(): Response {
     const message = error instanceof Error ? error.message : "Unknown error";
     return new Response(`Icon Error: ${message}`, { status: 500 });
   }
-}
-
-async function loadConfig(configUrl: string): Promise<RedirectsConfig | null> {
-  const cache = caches.default;
-  const cacheKey = new Request(configUrl);
-  let config: RedirectsConfig | null = null;
-
-  try {
-    const cached = await cache.match(cacheKey);
-    if (cached) {
-      const text = await cached.text();
-      config = safeParseJson<RedirectsConfig>(text, "cached parse");
-    }
-
-    if (!config) {
-      const response = await fetch(configUrl, { cf: { cacheTtl: 3600, cacheEverything: true } });
-      if (response && response.ok) {
-        const text = await response.text();
-        const parsed = safeParseJson<RedirectsConfig>(text, "config parse");
-        if (parsed) {
-          config = parsed;
-          await cache.put(cacheKey, new Response(text, {
-            headers: {
-              "Content-Type": "application/json",
-              "Cache-Control": "public, max-age=3600, s-maxage=3600"
-            }
-          }));
-        }
-      } else {
-        console.error("failed fetch config", response ? response.status : "no response");
-      }
-    }
-  } catch (error) {
-    console.error("load config err", error);
-  }
-
-  return config;
 }
 
 function getSlotSource(config: RedirectsConfig | null): SlotBranch | null {
@@ -388,15 +549,15 @@ function safeDecode(input: string): string {
   }
 }
 
-async function respondUsingRule(request: Request, rule: NormalizedRule, targetUrl: string): Promise<Response> {
+async function respondUsingRule(request: Request, rule: NormalizedRule, targetUrl: string, runtime: ResolvedRuntime): Promise<Response> {
   if (rule.type === "proxy") {
-    return proxyRequest(request, targetUrl);
+    return proxyRequest(request, targetUrl, runtime);
   }
 
   return redirectResponse(targetUrl, rule.status);
 }
 
-async function proxyRequest(request: Request, targetUrl: string): Promise<Response> {
+async function proxyRequest(request: Request, targetUrl: string, runtime: ResolvedRuntime): Promise<Response> {
   const headers = new Headers(request.headers);
   headers.set("x-forwarded-host", request.headers.get("host") ?? "");
   headers.set("x-forwarded-proto", "https");
@@ -408,7 +569,7 @@ async function proxyRequest(request: Request, targetUrl: string): Promise<Respon
     redirect: "manual"
   });
 
-  const response = await fetch(forwarded);
+  const response = await runtime.fetchImpl(forwarded);
   const responseHeaders = new Headers(response.headers);
   responseHeaders.delete("content-security-policy");
   responseHeaders.delete("content-security-policy-report-only");
@@ -443,3 +604,5 @@ function safeParseJson<T>(text: string, label: string): T | null {
     return null;
   }
 }
+
+export type { RedirectsConfig, RouteConfig };

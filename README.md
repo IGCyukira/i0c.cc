@@ -1,4 +1,44 @@
-Cloudflare Worker script: enforces HTTPS, serves a favicon, and applies redirect or proxy rules defined in a remote redirects.json file.
+Universal redirect runtime for fetch-compatible edge platforms (Cloudflare Workers, Vercel Edge Functions, Deno Deploy). It enforces HTTPS, serves a favicon, and applies redirect or proxy rules defined in a remote redirects.json file.
+
+```
+i0c.cc/
+|-- src/
+|   |-- lib/
+|   |   `-- handler.ts
+|   `-- platforms/
+|       |-- cloudflare.ts
+|       |-- vercel-route.ts
+|       `-- deno.ts
+|-- dist/
+|   `-- platforms/
+|       `-- cloudflare.js
+|-- package.json
+|-- tsconfig.json
+|-- tsconfig.build.json
+|-- wrangler.toml
+`-- ...
+```
+
+## Choose an adapter
+
+- Cloudflare Workers: build [src/platforms/cloudflare.ts](src/platforms/cloudflare.ts) to dist/platforms/cloudflare.js; Wrangler runs `npm run build` automatically.
+- Vercel Edge Functions (Next.js App Router): import handlers from [src/platforms/vercel-route.ts](src/platforms/vercel-route.ts).
+- Deno Deploy (or other `Deno.serve` targets): reuse the handler factory in [src/platforms/deno.ts](src/platforms/deno.ts).
+
+Need a custom runtime? Import `handleRedirectRequest` from [src/lib/handler.ts](src/lib/handler.ts) and call it with your own `Request` object plus optional `HandlerOptions` (for example, override the config URL or provide a cache implementation).
+
+Build for deployment with `npm run build`, then publish via `wrangler deploy`.
+
+## Configure the redirects source
+
+You can override the default GitHub location without touching the code. Set any of the environment variables below; the runtime will pick them up automatically on Cloudflare (Worker bindings), Vercel (process.env), or Deno Deploy (environment variables/secrets).
+
+- `REDIRECTS_CONFIG_URL` (fallback: `CONFIG_URL`) — absolute URL of the `redirects.json`. This short-circuits the repo/branch/path logic.
+- `REDIRECTS_CONFIG_REPO` (fallback: `CONFIG_REPO`) — GitHub repo in `owner/name` form.
+- `REDIRECTS_CONFIG_BRANCH` (fallback: `CONFIG_BRANCH`) — branch that hosts the data file.
+- `REDIRECTS_CONFIG_PATH` (fallback: `CONFIG_PATH`) — path to the JSON file inside the repo.
+
+If repo, branch, or path are provided (with or without a direct URL), the handler rebuilds the raw GitHub URL using [src/lib/handler.ts](src/lib/handler.ts#L24-L45). With no environment overrides, the defaults remain `IGCyukira/i0c.cc`, branch `data`, file `redirects.json`.
 
 # `redirects.json` Quick Reference
 

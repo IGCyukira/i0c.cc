@@ -1,4 +1,44 @@
-Cloudflare Worker 脚本：特点是强制 HTTPS、返回 favicon，并基于远程 redirects.json 中的规则执行重定向或代理。
+面向 Cloudflare Workers、Vercel Edge Functions、Deno Deploy 等 fetch 兼容边缘平台的通用脚本：负责强制 HTTPS、返回 favicon，并基于远程 redirects.json 中的规则执行重定向或代理。
+
+```
+i0c.cc/
+|-- src/
+|   |-- lib/
+|   |   `-- handler.ts
+|   `-- platforms/
+|       |-- cloudflare.ts
+|       |-- vercel-route.ts
+|       `-- deno.ts
+|-- dist/
+|   `-- platforms/
+|       `-- cloudflare.js
+|-- package.json
+|-- tsconfig.json
+|-- tsconfig.build.json
+|-- wrangler.toml
+`-- ...
+```
+
+## 选择适配器
+
+- Cloudflare Workers：构建 [src/platforms/cloudflare.ts](src/platforms/cloudflare.ts) 输出 dist/platforms/cloudflare.js，Wrangler 会自动执行 `npm run build`。
+- Vercel Edge Functions（Next.js App Router）：在路由处理器中引入 [src/platforms/vercel-route.ts](src/platforms/vercel-route.ts)。
+- Deno Deploy（或其他 `Deno.serve` 场景）：复用 [src/platforms/deno.ts](src/platforms/deno.ts) 提供的工厂函数。
+
+需要自定义运行时？可从 [src/lib/handler.ts](src/lib/handler.ts) 引入 `handleRedirectRequest`，再配合 `HandlerOptions`（例如替换配置地址或注入自定义缓存实现）。
+
+发布流程：先执行 `npm run build` 生成 dist/cloudflare.js，再运行 `wrangler deploy`。
+
+## 配置重定向数据源
+
+无需改代码即可切换 `redirects.json` 的来源。只要在部署环境里设置以下任意变量即可，Cloudflare（Worker bindings）、Vercel（process.env）以及 Deno Deploy（环境变量 / Secret）都会被自动识别：
+
+- `REDIRECTS_CONFIG_URL`（回退：`CONFIG_URL`）—— 指定 `redirects.json` 的完整 URL，会优先生效。
+- `REDIRECTS_CONFIG_REPO`（回退：`CONFIG_REPO`）—— GitHub 仓库，格式为 `所有者/仓库名`。
+- `REDIRECTS_CONFIG_BRANCH`（回退：`CONFIG_BRANCH`）—— 承载数据文件的分支。
+- `REDIRECTS_CONFIG_PATH`（回退：`CONFIG_PATH`）—— 仓库内的文件路径。
+
+如果提供了仓库 / 分支 / 路径，运行时会使用 [src/lib/handler.ts](src/lib/handler.ts#L24-L45) 自动拼出 raw.githubusercontent.com 地址。未设置任何变量时，默认值仍为仓库 `IGCyukira/i0c.cc`、分支 `data`、文件 `redirects.json`。
 
 # `redirects.json` 配置速查
 

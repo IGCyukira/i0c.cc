@@ -22,7 +22,7 @@ i0c.cc/
 ## Choose an adapter
 
 - Cloudflare Workers: build [src/platforms/cloudflare.ts](src/platforms/cloudflare.ts) to dist/platforms/cloudflare.js; Wrangler runs `npm run build` automatically.
-- Vercel Edge Functions (Next.js App Router): import handlers from [src/platforms/vercel-route.ts](src/platforms/vercel-route.ts).
+- Vercel Edge Functions: import handlers from [src/platforms/vercel-route.ts](src/platforms/vercel-route.ts).
 - Deno Deploy (or other `Deno.serve` targets): reuse the handler factory in [src/platforms/deno.ts](src/platforms/deno.ts).
 
 Need a custom runtime? Import `handleRedirectRequest` from [src/lib/handler.ts](src/lib/handler.ts) and call it with your own `Request` object plus optional `HandlerOptions` (for example, override the config URL or provide a cache implementation).

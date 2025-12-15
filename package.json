@@ -4,13 +4,15 @@
   "private": true,
   "scripts": {
     "build": "tsc --project tsconfig.build.json",
-    "dev": "wrangler dev",
-    "deploy": "wrangler deploy",
-    "typecheck": "tsc --noEmit"
+    "dev:cf": "wrangler dev",
+    "deploy:cf": "wrangler deploy",
+    "dev:vc": "npm run build && vercel dev", 
+    "deploy:vc": "vercel --prod"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20251213.0",
     "typescript": "^5.9.3",
-    "wrangler": "^4.54.0"
+    "wrangler": "^4.54.0",
+    "vercel": "latest" 
   }
 }

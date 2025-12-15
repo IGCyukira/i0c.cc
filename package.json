@@ -15,6 +15,7 @@
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20251213.0",
     "@esbuild-plugins/tsconfig-paths": "^0.1.2",
+    "deno-bin": "^2.2.7",
     "tsup": "^8.5.1",
     "typescript": "^5.9.3",
     "vercel": "^50.0.1",

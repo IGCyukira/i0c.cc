@@ -1,5 +1,4 @@
-// @ts-expect-error Deno requires explicit ".ts" extension; suppressed for Node typecheck.
-import { handleRedirectRequest, resolveConfigUrlFromBindings, type HandlerOptions } from "../lib/handler.ts";
+import { handleRedirectRequest, resolveConfigUrlFromBindings, type HandlerOptions } from "@/lib/handler";
 
 export function createDenoHandler(options?: HandlerOptions) {
   const configUrl = options?.configUrl ?? resolveConfigUrlFromBindings();

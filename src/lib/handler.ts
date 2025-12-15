@@ -1,5 +1,4 @@
-// @ts-expect-error Deno requires explicit ".ts" extension for relative imports.
-import { base64Icon } from "../assets/favicon.ts";
+import { base64Icon } from "@/assets/favicon";
 
 declare const process: undefined | { env?: Record<string, string | undefined> };
 declare const Deno: undefined | { env?: { get?(key: string): string | undefined } };

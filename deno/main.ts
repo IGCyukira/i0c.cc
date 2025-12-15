@@ -1,5 +1,4 @@
-// @ts-expect-error -- Deno requires explicit .ts extension; allowed only in this entrypoint.
-import { createDenoHandler } from "../src/platforms/deno.ts";
+import { createDenoHandler } from "@/platforms/deno";
 
 type DenoLike = {
 	serve?: (handler: (request: Request) => Response | Promise<Response>) => unknown;

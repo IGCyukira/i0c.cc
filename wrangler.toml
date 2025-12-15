@@ -1,8 +1,4 @@
 # wrangler.toml
 name = 'i0c'
-main = "dist/platforms/cloudflare.js"
+main = "src/platforms/cloudflare.ts"
 compatibility_date = "2025-12-14"
-
-[build]
-command = "npm run build"
-watch_dir = "src"

@@ -4,7 +4,7 @@
   "rewrites": [
     {
       "source": "/(.*)",
-      "destination": "/src/platforms/vercel-edge"
+      "destination": "/api/index"
     }
   ]
 }

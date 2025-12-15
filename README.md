@@ -5,6 +5,17 @@ Live previews:
 - Vercel deployment: https://i0c-cc.vercel.app
 - Netlify deployment: https://i0c-cc.netlify.app
 
+## One-click deploy
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository=https://github.com/IGCyukira/i0c.cc)
+[![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/IGCyukira/i0c.cc)
+[![Deploy to Cloudflare Workers](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/IGCyukira/i0c.cc)
+
+After deploying:
+- Set `REDIRECTS_CONFIG_URL` or the repo/branch/path trio in your platform’s dashboard so the runtime can load the correct redirects.json.
+- Sync secrets across environments if you override other handler options (for example cache bindings).
+- Re-run `npm run build` locally when updating the shared redirect logic, then redeploy.
+
 ```
 i0c.cc/
 |-- src/

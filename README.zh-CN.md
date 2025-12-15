@@ -5,6 +5,17 @@
 - Vercel 部署：https://i0c-cc.vercel.app
 - Netlify 部署：https://i0c-cc.netlify.app
 
+## 一键部署
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository=https://github.com/IGCyukira/i0c.cc)
+[![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/IGCyukira/i0c.cc)
+[![Deploy to Cloudflare Workers](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/IGCyukira/i0c.cc)
+
+部署完成后记得：
+- 在目标平台的环境配置里设置 `REDIRECTS_CONFIG_URL` 或仓库/分支/路径三元组，让运行时代码能读取正确的 redirects.json。
+- 如果覆盖了额外的处理选项（例如缓存绑定），请同步这些机密到各个环境。
+- 更新公共重定向逻辑后在本地执行 `npm run build`，再触发重新部署。
+
 ```
 i0c.cc/
 |-- src/

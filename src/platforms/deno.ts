@@ -8,6 +8,4 @@ export function createDenoHandler(options?: HandlerOptions) {
   return (request: Request): Promise<Response> => handleRedirectRequest(request, baseOptions);
 }
 
-export const handler = createDenoHandler();
-
 export type { HandlerOptions };

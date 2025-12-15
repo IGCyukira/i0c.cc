@@ -20,8 +20,7 @@
   "include": [
     "src/**/*.ts", 
     "src/**/*.js", 
-    "api/**/*.ts",  
-    "deno/**/*.ts"
+    "api/**/*.ts"  
   ],
   "exclude": ["node_modules"]
 }

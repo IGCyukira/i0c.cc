@@ -6,8 +6,8 @@
     "build": "tsup --config tsup.config.ts && node scripts/prepare-vercel-output.mjs",
     "dev:cf": "wrangler dev",
     "deploy:cf": "wrangler deploy",
-    "dev:dn": "deno run --allow-net --allow-env --import-map=deno/import_map.json deno/main.ts",
-    "deploy:dn": "deno deploy --import-map=deno/import_map.json deno/main.ts",
+    "dev:dn": "deno run --allow-net --allow-env --import-map=runtime/deno/import_map.json src/platforms/deno.ts",
+    "deploy:dn": "deno deploy --import-map=runtime/deno/import_map.json src/platforms/deno.ts",
     "build:vc": "tsup --config tsup.config.ts --watch --onSuccess \"node scripts/prepare-vercel-output.mjs\"",
     "dev:vc": "concurrently \"npm run build:vc\" \"vercel dev\"",
     "deploy:vc": "vercel --prod"

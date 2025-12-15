@@ -1,10 +1,4 @@
 {
-  "buildCommand": "echo 'Skipping build step'",
-  "outputDirectory": ".",
-  "rewrites": [
-    {
-      "source": "/(.*)",
-      "destination": "/api/index"
-    }
-  ]
+  "buildCommand": "npm run build:vc",
+  "outputDirectory": ".vercel/output"
 }

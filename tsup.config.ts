@@ -30,5 +30,6 @@ export default defineConfig({
   skipNodeModulesBundle: true,
   shims: false,
   platform: "neutral",
-  esbuildPlugins: [tsconfigPathsPlugin({ tsconfig: "./tsconfig.json" })]
+  esbuildPlugins: [tsconfigPathsPlugin({ tsconfig: "./tsconfig.json" })],
+  onSuccess: "node scripts/remove-empty-dirs.mjs dist"
 });

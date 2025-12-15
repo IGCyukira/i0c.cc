@@ -1,4 +1,5 @@
 {
+  "buildCommand": "echo 'Skipping build step'",
   "rewrites": [
     {
       "source": "/(.*)",

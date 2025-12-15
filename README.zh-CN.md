@@ -22,7 +22,7 @@ i0c.cc/
 ## 选择适配器
 
 - Cloudflare Workers：构建 [src/platforms/cloudflare.ts](src/platforms/cloudflare.ts) 输出 dist/platforms/cloudflare.js，Wrangler 会自动执行 `npm run build`。
-- Vercel Edge Functions（Next.js App Router）：在路由处理器中引入 [src/platforms/vercel-route.ts](src/platforms/vercel-route.ts)。
+- Vercel Edge Functions：在路由处理器中引入 [src/platforms/vercel-route.ts](src/platforms/vercel-route.ts)。
 - Deno Deploy（或其他 `Deno.serve` 场景）：复用 [src/platforms/deno.ts](src/platforms/deno.ts) 提供的工厂函数。
 
 需要自定义运行时？可从 [src/lib/handler.ts](src/lib/handler.ts) 引入 `handleRedirectRequest`，再配合 `HandlerOptions`（例如替换配置地址或注入自定义缓存实现）。

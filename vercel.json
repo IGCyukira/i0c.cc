@@ -1,7 +1,7 @@
 {
   "functions": {
     "api/index.ts": {
-      "runtime": "vercel-edge@2.0.0"
+      "runtime": "vercel-edge"
     }
   },
   "routes": [

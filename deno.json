@@ -1,0 +1,26 @@
+{
+  "tasks": {
+    "dev": "deno run --allow-net --allow-env --watch deno/main.ts",
+    "deploy": "deployctl deploy --project=i0c-redirect-worker deno/main.ts"
+  },
+  "imports": {
+    "@/": "./src/",
+    "@/assets/favicon": "./src/assets/favicon.ts",
+    "@/lib/handler": "./src/lib/handler.ts"
+  },
+  "compilerOptions": {
+    "strict": true,
+    "lib": ["dom", "deno.ns"]
+  },
+  "lint": {
+    "include": ["src/", "deno/"],
+    "exclude": ["node_modules/", "dist/"]
+  },
+  "fmt": {
+    "include": ["src/", "deno/"],
+    "exclude": ["node_modules/", "dist/"],
+    "lineWidth": 100,
+    "singleQuote": false,
+    "semiColons": true
+  }
+}

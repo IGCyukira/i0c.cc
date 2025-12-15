@@ -1,4 +1,4 @@
-面向 Cloudflare Workers、Vercel Edge Functions、Deno Deploy 等 fetch 兼容边缘平台的通用脚本：负责强制 HTTPS、返回 favicon，并基于远程 redirects.json 中的规则执行重定向或代理。
+面向 Cloudflare Workers、Vercel Edge Functions 等 fetch 兼容边缘平台的通用脚本：负责强制 HTTPS、返回 favicon，并基于远程 redirects.json 中的规则执行重定向或代理。
 
 ```
 i0c.cc/
@@ -7,8 +7,7 @@ i0c.cc/
 |   |   `-- handler.ts
 |   `-- platforms/
 |       |-- cloudflare.ts
-|       |-- vercel-route.ts
-|       `-- deno.ts
+|       `-- vercel-edge.ts
 |-- dist/
 |   `-- platforms/
 |       `-- cloudflare.js
@@ -22,8 +21,7 @@ i0c.cc/
 ## 选择适配器
 
 - Cloudflare Workers：构建 [src/platforms/cloudflare.ts](src/platforms/cloudflare.ts) 输出 dist/platforms/cloudflare.js，Wrangler 会自动执行 `npm run build`。
-- Vercel Edge Functions：在路由处理器中引入 [src/platforms/vercel-route.ts](src/platforms/vercel-route.ts)。
-- Deno Deploy（或其他 `Deno.serve` 场景）：复用 [src/platforms/deno.ts](src/platforms/deno.ts) 提供的工厂函数。
+- Vercel Edge Functions：在路由处理器中引入 [src/platforms/vercel-edge.ts](src/platforms/vercel-edge.ts)。
 
 需要自定义运行时？可从 [src/lib/handler.ts](src/lib/handler.ts) 引入 `handleRedirectRequest`，再配合 `HandlerOptions`（例如替换配置地址或注入自定义缓存实现）。
 
@@ -31,7 +29,7 @@ i0c.cc/
 
 ## 配置重定向数据源
 
-无需改代码即可切换 `redirects.json` 的来源。只要在部署环境里设置以下任意变量即可，Cloudflare（Worker bindings）、Vercel（process.env）以及 Deno Deploy（环境变量 / Secret）都会被自动识别：
+无需改代码即可切换 `redirects.json` 的来源。只要在部署环境里设置以下任意变量即可，Cloudflare（Worker bindings）和 Vercel（process.env）都会被自动识别：
 
 - `REDIRECTS_CONFIG_URL`（回退：`CONFIG_URL`）—— 指定 `redirects.json` 的完整 URL，会优先生效。
 - `REDIRECTS_CONFIG_REPO`（回退：`CONFIG_REPO`）—— GitHub 仓库，格式为 `所有者/仓库名`。

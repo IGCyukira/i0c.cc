@@ -6,8 +6,6 @@
     "build": "tsup --config tsup.config.ts && node scripts/prepare-vercel-output.mjs",
     "dev:cf": "wrangler dev",
     "deploy:cf": "wrangler deploy",
-    "dev:dn": "deno run --allow-net --allow-env --import-map=runtime/deno/import_map.json src/platforms/deno.ts",
-    "deploy:dn": "deno task deploy",
     "build:vc": "npm run build && node scripts/prepare-vercel-output.mjs",
     "build:vc:watch": "tsup --config tsup.config.ts --watch --onSuccess \"node scripts/prepare-vercel-output.mjs\"",
     "dev:vc": "concurrently \"npm run build:vc:watch\" \"vercel dev\"",
@@ -16,7 +14,6 @@
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20251213.0",
     "@esbuild-plugins/tsconfig-paths": "^0.1.2",
-    "deno-bin": "^2.2.7",
     "concurrently": "^9.2.1",
     "tsup": "^8.5.1",
     "typescript": "^5.9.3",

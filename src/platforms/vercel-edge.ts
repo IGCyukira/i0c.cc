@@ -1,4 +1,4 @@
-import { handleRedirectRequest, resolveConfigUrlFromBindings, type HandlerOptions } from "@/lib/handler.ts";
+import { handleRedirectRequest, resolveConfigUrlFromBindings, type HandlerOptions } from "@/lib/handler";
 
 declare const process: undefined | { env?: Record<string, string | undefined> };
 

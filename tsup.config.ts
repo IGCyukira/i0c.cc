@@ -14,7 +14,7 @@ export default defineConfig({
   entry: {
     "platforms/cloudflare": "src/platforms/cloudflare.ts",
     "platforms/deno": "src/platforms/deno.ts",
-    "api/index": "api/index.ts"
+    "api/index": "src/platforms/vercel-edge.ts"
   },
   format: ["esm"],
   target: "es2021",

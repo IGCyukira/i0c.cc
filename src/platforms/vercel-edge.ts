@@ -22,6 +22,10 @@ export function createVercelRouteHandler(options?: HandlerOptions) {
 
 const defaultHandler = createVercelRouteHandler();
 
+export const config = { runtime };
+
+export default defaultHandler;
+
 export const GET = defaultHandler;
 export const HEAD = defaultHandler;
 export const OPTIONS = defaultHandler;

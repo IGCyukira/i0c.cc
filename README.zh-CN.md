@@ -7,9 +7,9 @@
 
 ## 一键部署
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository=https://github.com/IGCyukira/i0c.cc)
-[![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/IGCyukira/i0c.cc)
-[![Deploy to Cloudflare Workers](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/IGCyukira/i0c.cc)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository=https://github.com/IGCyukira/i0c.cc)  <br>
+[![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/IGCyukira/i0c.cc)  <br>
+[![Deploy to Cloudflare Workers](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/IGCyukira/i0c.cc)  
 
 部署完成后记得：
 - 在目标平台的环境配置里设置 `REDIRECTS_CONFIG_URL` 或仓库/分支/路径三元组，让运行时代码能读取正确的 redirects.json。

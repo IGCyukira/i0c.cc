@@ -4,12 +4,6 @@ type DenoLike = {
   serve?: (handler: (request: Request) => Response | Promise<Response>) => unknown;
 };
 
-declare global {
-  interface ImportMeta {
-    readonly main?: boolean;
-  }
-}
-
 function getServe() {
   const denoGlobal = globalThis as { Deno?: DenoLike };
   const serve = denoGlobal.Deno?.serve;
@@ -33,6 +27,8 @@ export function serveDeno(options?: HandlerOptions) {
 
 export type { HandlerOptions };
 
-if (import.meta.main) {
+const importMeta = import.meta as { main?: boolean };
+
+if (importMeta.main) {
   serveDeno();
 }

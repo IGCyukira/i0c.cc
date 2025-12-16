@@ -4,8 +4,8 @@
 
 在线预览：
 - 主域名：https://i0c.cc
-- Vercel 部署：https://i0c-cc.vercel.app
-- Netlify 部署：https://i0c-cc.netlify.app
+- Vercel 部署：https://vc.i0c.cc
+- Netlify 部署：https://nf.i0c.cc
 
 ## 一键部署
 

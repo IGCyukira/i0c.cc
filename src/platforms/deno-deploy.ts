@@ -1,7 +1,6 @@
-import { handleRedirectRequest } from "@/lib/handler";
-
+// deploy-smoke-test.ts
 export default {
-  fetch(request: Request) {
-    return handleRedirectRequest(request, {});
+  fetch() {
+    return new Response("ok");
   },
 };

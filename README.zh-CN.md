@@ -20,13 +20,12 @@
 
 ## 选择适配器
 
-- Cloudflare Workers：构建 [src/platforms/cloudflare.ts](src/platforms/cloudflare.ts) 输出 dist/platforms/cloudflare.js，Wrangler 会自动执行 `npm run build`。
-- Vercel Edge Functions：在路由处理器中引入 [src/platforms/vercel-edge.ts](src/platforms/vercel-edge.ts)。
-- Netlify Edge Functions：部署 [src/platforms/netlify-edge.ts](src/platforms/netlify-edge.ts)（或执行 `npm run build` 后的 dist/netlify/edge-functions/redirects.js）。
+- Cloudflare Workers：[src/platforms/cloudflare.ts](src/platforms/cloudflare.ts)  
+- Vercel Edge Functions：[src/platforms/vercel-edge.ts](src/platforms/vercel-edge.ts)  
+- Netlify Edge Functions：[src/platforms/netlify-edge.ts](src/platforms/netlify-edge.ts)  
 
 需要自定义运行时？可从 [src/lib/handler.ts](src/lib/handler.ts) 引入 `handleRedirectRequest`，再配合 `HandlerOptions`（例如替换配置地址或注入自定义缓存实现）。
 
-发布流程：先执行 `npm run build` 生成 dist/cloudflare.js，再运行 `wrangler deploy`。
 
 ## 配置重定向数据源
 

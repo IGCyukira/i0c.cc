@@ -1,24 +1,12 @@
 import { base64Icon } from "@/assets/favicon";
 
 declare const process: undefined | { env?: Record<string, string | undefined> };
-declare const Deno: undefined | { env?: { get?(key: string): string | undefined } };
 
 function readEnvVar(key: string): string | undefined {
   if (typeof process !== "undefined" && process?.env) {
     const value = process.env[key];
     if (typeof value === "string" && value.length > 0) {
       return value;
-    }
-  }
-
-  if (typeof Deno !== "undefined" && typeof Deno?.env?.get === "function") {
-    try {
-      const value = Deno.env.get(key);
-      if (typeof value === "string" && value.length > 0) {
-        return value;
-      }
-    } catch {
-      // Deno Deploy may forbid env access; ignore silently.
     }
   }
 

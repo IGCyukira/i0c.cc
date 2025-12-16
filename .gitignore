@@ -1,7 +1,7 @@
 node_modules/
 dist/
-.env
 .vscode/
-/.vercel
+.vercel/
 netlify/
 .wrangler/
+.env

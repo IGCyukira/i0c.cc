@@ -18,25 +18,6 @@
 - 如果覆盖了额外的处理选项（例如缓存绑定），请同步这些机密到各个环境。
 - 更新公共重定向逻辑后在本地执行 `npm run build`，再触发重新部署。
 
-```
-i0c.cc/
-|-- src/
-|   |-- lib/
-|   |   `-- handler.ts
-|   `-- platforms/
-|       |-- cloudflare.ts
-|       |-- netlify-edge.ts
-|       `-- vercel-edge.ts
-|-- dist/
-|   `-- platforms/
-|       `-- cloudflare.js
-|-- package.json
-|-- tsconfig.json
-|-- tsconfig.build.json
-|-- wrangler.toml
-`-- ...
-```
-
 ## 选择适配器
 
 - Cloudflare Workers：构建 [src/platforms/cloudflare.ts](src/platforms/cloudflare.ts) 输出 dist/platforms/cloudflare.js，Wrangler 会自动执行 `npm run build`。

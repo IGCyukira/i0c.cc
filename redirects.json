@@ -22,7 +22,6 @@
       "/i/b": {
         "type": "exact",
         "target": "https://blog.igcrystal.icu",
-        "appendPath": true,
         "status": 302
       }
     },
@@ -34,7 +33,7 @@
         "status": 302
       },
       "/w/nl/pa": {
-        "type": "exact",
+        "type": "prefix",
         "target": "https://aaaneko.neo-life.wenturc.com",
         "appendPath": true,
         "status": 302
@@ -42,7 +41,6 @@
       "/w/nl/a": {
         "type": "exact",
         "target": "https://cbblover.neo-life.wenturc.com",
-        "appendPath": false,
         "status": 302
       }
     },
@@ -68,7 +66,6 @@
       "/w/s": {
         "type": "exact",
         "target": "https://status.wenturc.com/status/all",
-        "appendPath": false,
         "status": 302
       },
       "/w/p": {

@@ -111,6 +111,30 @@
           ]
         }
       },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "type": { "const": "proxy" }
+            },
+            "required": ["type"]
+          },
+          "then": {
+            "not": { "required": ["status"] }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": { "const": "exact" }
+            },
+            "required": ["type"]
+          },
+          "then": {
+            "not": { "required": ["appendPath"] }
+          }
+        }
+      ],
       "oneOf": [
         {
           "required": ["target"],

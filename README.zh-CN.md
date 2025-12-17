@@ -40,15 +40,17 @@
 
 # `redirects.json` 配置速查
 
+现在可以部署[面板](https://github.com/IGCyukira/i0c.cc-webui)从而方便在线编辑 `redirects.json` 了。
+
 在 `redirects.json` 中提供 `Slots`（或 `slots` / `SLOT`）对象即可定义所有规则。下表列出每条路由可用字段：
 
 | 字段        | 类型     | 默认值  | 说明 |
 |-------------|----------|---------|------|
 | `type`      | string   | `prefix` | 路由模式：`prefix` 前缀重定向、`exact` 精确匹配、`proxy` 反向代理 |
-| `target`    | string   | `""`    | 目标地址（优先于 `to` / `url`） |
-| `to` / `url`| string   | `""`    | `target` 的别名，缺省时可使用 |
-| `appendPath`| boolean  | `true`   | `prefix` 模式下是否拼接余下路径 |
-| `status`    | number   | `302`    | 重定向状态码（301 / 302 / 307 / 308 等） |
+| `target`    | string   | `""`    | 目标地址（`target` / `to` / `url` 三选一） |
+| `to` / `url`| string   | `""`    | `target` 的别名字段（`target` / `to` / `url` 三选一） |
+| `appendPath`| boolean  | `true`   | `prefix` / `proxy` 模式下是否拼接余下路径（`exact` 不支持） |
+| `status`    | number   | `302`    | 非 `proxy` 响应的状态码（`proxy` 不要设置） |
 | `priority`  | number   | 按顺序   | 同一路径存在多条规则时用于排序，数字越小优先级越高 |
 
 - 键名需以 `/` 开头，可使用冒号参数（如 `:id`）或 `*` 通配符；匹配结果可在目标里用 `$1`、`:id` 等占位符。
@@ -125,8 +127,7 @@
     // 通配符：将 /media/* 透传到 CDN，并保留剩余路径
     "/media/*": {
       "type": "proxy",
-      "target": "https://cdn.example.com/$1",
-      "status": 200
+      "target": "https://cdn.example.com/$1"
     },
 
     // 前缀重定向：后台入口，保持原路径

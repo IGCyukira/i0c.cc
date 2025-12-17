@@ -41,15 +41,17 @@ If repo, branch, or path are provided (with or without a direct URL), the handle
 
 # `redirects.json` Quick Reference
 
+You can also deploy the WebUI panel to edit `redirects.json` online: https://github.com/IGCyukira/i0c.cc-webui
+
 Provide a `Slots` (or `slots` / `SLOT`) object in `redirects.json` to define all routing rules. The table below lists the available fields for each route:
 
 | Field        | Type     | Default | Description |
 |--------------|----------|---------|-------------|
 | `type`       | string   | `prefix` | Route mode: `prefix` for prefix redirects, `exact` for exact matches, `proxy` for reverse proxying |
-| `target`     | string   | `""`    | Destination URL (takes precedence over `to` / `url`) |
-| `to` / `url` | string   | `""`    | Alias of `target`, can be used when `target` is omitted |
-| `appendPath` | boolean  | `true`   | Whether to append the remaining path when using `prefix` mode |
-| `status`     | number   | `302`    | HTTP status code for redirects (301 / 302 / 307 / 308, etc.) |
+| `target`     | string   | `""`    | Destination URL (use exactly one of `target` / `to` / `url`) |
+| `to` / `url` | string   | `""`    | Alias fields (use exactly one of `target` / `to` / `url`) |
+| `appendPath` | boolean  | `true`   | Whether to append the remaining path when using `prefix` / `proxy` mode (not applicable to `exact`) |
+| `status`     | number   | `302`    | HTTP status code for non-proxy responses (do not set for `proxy`) |
 | `priority`   | number   | by order | Determines rule precedence for the same path; smaller numbers are matched first |
 
 - Keys must start with `/` and can use colon parameters (such as `:id`) or the `*` wildcard; captures can be referenced in the target with `$1`, `:id`, and so on.
@@ -126,8 +128,7 @@ Tip: add the schema reference below to unlock autocomplete and validation in sup
     // Wildcard: proxy /media/* to the CDN and keep the remainder of the path
     "/media/*": {
       "type": "proxy",
-      "target": "https://cdn.example.com/$1",
-      "status": 200
+      "target": "https://cdn.example.com/$1"
     },
 
     // Prefix redirect: admin console entry, keeping the original path

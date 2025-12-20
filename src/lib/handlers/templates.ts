@@ -1,3 +1,15 @@
+/**
+ * @file templates.ts
+ * @description
+ * [EN] 404 Not Found Page HTML.
+ * A lightweight, responsive error page styled with Tailwind CSS (via CDN).
+ *
+ * [CN] 404 未找到页面 HTML。
+ * 一个轻量级、响应式的错误页面，通过 CDN 使用 Tailwind CSS 进行样式设置。
+ *
+ * @see {@link https://github.com/IGCyukira/i0c.cc} for repository info.
+ */ 
+
 export const notFoundPageHtml = `
 <!DOCTYPE html>
 <html lang="en">

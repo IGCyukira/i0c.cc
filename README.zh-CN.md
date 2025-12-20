@@ -1,4 +1,4 @@
-# <img src="https://raw.githubusercontent.com/IGCyukira/i0c.cc/refs/heads/main/7F3AA226732D061E8AC829AD323B314D1.webp" alt="i0c.cc" width = "420">
+# i0c.cc
 
 面向 Cloudflare Workers、Vercel Edge Functions、Netlify Edge Functions 等 fetch 兼容边缘平台的通用脚本：负责强制 HTTPS、返回 favicon，并基于远程 redirects.json 中的规则执行重定向或代理。
 
@@ -26,7 +26,6 @@
 
 需要自定义运行时？可从 [src/lib/handler.ts](src/lib/handler.ts) 引入 `handleRedirectRequest`，再配合 `HandlerOptions`（例如替换配置地址或注入自定义缓存实现）。
 
-
 ## 配置重定向数据源
 
 无需改代码即可切换 `redirects.json` 的来源。只要在部署环境里设置以下任意变量即可，Cloudflare（Worker bindings）和 Vercel（process.env）都会被自动识别：
@@ -36,7 +35,7 @@
 - `REDIRECTS_CONFIG_BRANCH`（回退：`CONFIG_BRANCH`）—— 承载数据文件的分支。
 - `REDIRECTS_CONFIG_PATH`（回退：`CONFIG_PATH`）—— 仓库内的文件路径。
 
-如果提供了仓库 / 分支 / 路径，运行时会使用 [src/lib/handler.ts](src/lib/handler.ts#L24-L45) 自动拼出 raw.githubusercontent.com 地址。未设置任何变量时，默认值仍为仓库 `IGCyukira/i0c.cc`、分支 `data`、文件 `redirects.json`。
+如果提供了仓库 / 分支 / 路径，运行时会自动拼出 raw.githubusercontent.com 地址。未设置任何变量时，默认值仍为仓库 `IGCyukira/i0c.cc`、分支 `data`、文件 `redirects.json`。
 
 # `redirects.json` 配置速查
 
@@ -49,9 +48,9 @@
 | `type`      | string   | `prefix` | 路由模式：`prefix` 前缀重定向、`exact` 精确匹配、`proxy` 反向代理 |
 | `target`    | string   | `""`    | 目标地址（`target` / `to` / `url` 三选一） |
 | `to` / `url`| string   | `""`    | `target` 的别名字段（`target` / `to` / `url` 三选一） |
-| `appendPath`| boolean  | `true`   | `prefix` / `proxy` 模式下是否拼接余下路径（`exact` 不支持） |
-| `status`    | number   | `302`    | 非 `proxy` 响应的状态码（`proxy` 不要设置） |
-| `priority`  | number   | 按顺序   | 同一路径存在多条规则时用于排序，数字越小优先级越高 |
+| `appendPath`| boolean  | `true`  | `prefix` / `proxy` 模式下是否拼接余下路径（`exact` 不支持） |
+| `status`    | number   | `302`   | 非 `proxy` 响应的状态码（`proxy` 不要设置） |
+| `priority`  | number   | 按顺序  | 同一路径存在多条规则时用于排序，数字越小优先级越高 |
 
 - 键名需以 `/` 开头，可使用冒号参数（如 `:id`）或 `*` 通配符；匹配结果可在目标里用 `$1`、`:id` 等占位符。
 - `proxy` 类型会把请求透传至目标并回传对方响应，其余类型返回 `Location` 重定向。
@@ -66,6 +65,7 @@
     // ...
   }
 }
+
 ```
 
 ## 示例 `redirects.json`
@@ -139,6 +139,7 @@
     }
   }
 }
+
 ```
 
 将文件提交后，Worker 会自动按以上配置处理重定向与代理。

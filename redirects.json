@@ -38,7 +38,7 @@
         "appendPath": true,
         "status": 302
       },
-      "/w/nl/a": {
+      "/w/nl/ab": {
         "type": "exact",
         "target": "https://cbblover.neo-life.wenturc.com",
         "status": 302

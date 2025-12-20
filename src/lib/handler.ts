@@ -2,7 +2,8 @@ import { loadConfig, resolveRuntimeOptions } from "./loader";
 import { applyTemplate, appendOriginalQuery, buildCompiledList, flattenSlots, getSlotSource, resolvePrefixTarget } from "./matcher";
 import { HandlerOptions, RouteValueEntry } from "./types";
 import { serveFavicon } from "./favicon-serve";
-import { HTTPS_REDIRECT_STATUS, needsHttpsRedirect, respondUsingRule } from "./response";
+import { HTTPS_REDIRECT_STATUS } from "./constants";
+import { needsHttpsRedirect, respondUsingRule } from "./response";
 import { normalisePath, safeDecode } from "./utils";
 
 export async function handleRedirectRequest(request: Request, options: HandlerOptions = {}): Promise<Response> {
@@ -62,6 +63,5 @@ export async function handleRedirectRequest(request: Request, options: HandlerOp
   });
 }
 
-// 导出必要的辅助函数，保持兼容性
 export { resolveConfigUrlFromBindings, DEFAULT_CONFIG_URL } from "./config";
 export type { RedirectsConfig, RouteConfig } from "./types";

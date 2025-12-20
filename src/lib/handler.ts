@@ -63,5 +63,5 @@ export async function handleRedirectRequest(request: Request, options: HandlerOp
   });
 }
 
-export { resolveConfigUrlFromBindings, DEFAULT_CONFIG_URL } from "./handlers/config";
-export type { RedirectsConfig, RouteConfig } from "./handlers/types";
+export { resolveConfigUrlFromBindings, DEFAULT_CONFIG_URL } from "@handlers/config";
+export type { RedirectsConfig, RouteConfig } from "@handlers/types";

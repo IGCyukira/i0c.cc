@@ -56,6 +56,12 @@
         "appendPath": true,
         "status": 302,
         "target": "https://pixiv.revaea.com"
+      },
+      "/r/s": {
+        "type": "prefix",
+        "appendPath": true,
+        "target": "https://st.revaea.com",
+        "status": "302"
       }
     }
   }

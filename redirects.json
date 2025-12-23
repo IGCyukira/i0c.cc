@@ -62,6 +62,18 @@
         "appendPath": true,
         "target": "https://st.revaea.com",
         "status": "302"
+      },
+      "/r/c": {
+        "type": "prefix",
+        "appendPath": true,
+        "target": "https://c.revaea.com",
+        "status": "302"
+      },
+      "/r/n": {
+        "type": "prefix",
+        "appendPath": true,
+        "status": "302",
+        "target": "https://n.revaea.com"
       }
     }
   }

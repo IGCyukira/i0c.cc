@@ -7,11 +7,11 @@
         "appendPath": false,
         "target": "https://api.revaea.com"
       },
-      "/w": {
+      "/r": {
         "type": "prefix",
-        "target": "https://wenturc.com",
         "appendPath": true,
-        "status": 302
+        "status": 302,
+        "target": "https://revaea.com"
       },
       "/i": {
         "type": "prefix",
@@ -45,13 +45,13 @@
       }
     },
     "Others": {
-      "/w/h": {
+      "/r/h": {
         "type": "prefix",
         "appendPath": true,
         "status": 302,
         "target": "https://hls.revaea.com"
       },
-      "/w/p": {
+      "/r/p": {
         "type": "prefix",
         "appendPath": true,
         "status": 302,

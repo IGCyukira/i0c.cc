@@ -54,13 +54,12 @@ export async function handleRedirectRequest(request: Request, options: HandlerOp
     
     const compiledList = buildCompiledList(rawRules);
     const decodedPath = safeDecode(path);
+    const tasks: Promise<Response>[] = [];
 
     for (const item of compiledList) {
       const { rule, regex, names, isParam, base } = item;
       
-      if (!rule.target) {
-        continue;
-      }
+      if (!rule.target) continue;
 
       let targetUrl: string | null = null;
       const match = decodedPath.match(regex);
@@ -73,23 +72,47 @@ export async function handleRedirectRequest(request: Request, options: HandlerOp
       }
 
       if (targetUrl) {
-        const response = await respondUsingRule(request, rule, targetUrl, runtime);
+        const reqClone = request.clone() as Request;
+        const task = async () => {
+          const response = await respondUsingRule(reqClone, rule, targetUrl!, runtime);
 
-        if (rule.type === "proxy" && response.status === 404) {
-          continue; 
-        }
+          if (rule.type === "proxy") {
+            if (response.status === 404) {
+              throw new Error(`[Proxy] 404 Not Found from ${targetUrl}`);
+            }
+            if (response.status >= 500) {
+              throw new Error(`[Proxy] Upstream Error ${response.status} from ${targetUrl}`);
+            }
+          }
+          
+          return response;
+        };
 
-        return response;
+        tasks.push(task());
       }
     }
 
-    return new Response(notFoundPageHtml, {
-      status: 404,
-      headers: {
-        "Content-Type": "text/html; charset=utf-8",
-        "Cache-Control": "public, max-age=60"
-      }
-    });
+    if (tasks.length === 0) {
+      return new Response(notFoundPageHtml, {
+        status: 404,
+        headers: {
+          "Content-Type": "text/html; charset=utf-8",
+          "Cache-Control": "public, max-age=60"
+        }
+      });
+    }
+
+    try {
+      return await Promise.any(tasks);
+    } catch (aggregateError) {
+      return new Response(notFoundPageHtml, {
+        status: 404,
+        headers: {
+          "Content-Type": "text/html; charset=utf-8",
+          "Cache-Control": "public, max-age=60"
+        }
+      });
+    }
 
   } catch (error) {
     console.error("[Handler Critical Error]", error);

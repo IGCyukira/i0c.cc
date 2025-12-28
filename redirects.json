@@ -81,6 +81,12 @@
           "appendPath": true,
           "target": "https://plugins.astrbot.qzz.io/_nuxt/$1",
           "priority": "10"
+        },
+        {
+          "type": "proxy",
+          "appendPath": true,
+          "priority": "10",
+          "target": "https://astrbot.qzz.io/_nuxt/$1"
         }
       ]
     }

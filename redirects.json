@@ -73,6 +73,16 @@
         "status": "302",
         "target": "https://n.revaea.com"
       }
+    },
+    "API": {
+      "/_nuxt/*": [
+        {
+          "type": "proxy",
+          "appendPath": true,
+          "target": "https://plugins.astrbot.qzz.io/_nuxt/$1",
+          "priority": "10"
+        }
+      ]
     }
   }
 }

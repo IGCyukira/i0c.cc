@@ -75,18 +75,23 @@
       }
     },
     "API": {
-      "/_nuxt/*": [
-        {
-          "type": "proxy",
-          "appendPath": true,
-          "target": "https://plugins.astrbot.qzz.io/_nuxt/$1",
-          "priority": "10"
-        }
-      ],
+      "/_nuxt/*": {
+        "type": "proxy",
+        "appendPath": true,
+        "target": "https://plugins.astrbot.qzz.io/_nuxt/$1",
+        "priority": "10"
+      },
       "/_next/*": {
         "type": "proxy",
         "appendPath": true,
-        "target": "https://astrbot.qzz.io/_next/$1"
+        "target": "https://astrbot.qzz.io/_next/$1",
+        "priority": "10"
+      },
+      "/api/plugins*": {
+        "type": "proxy",
+        "appendPath": true,
+        "target": "https://plugins.astrbot.qzz.io/api/plugins$1",
+        "priority": "10"
       }
     }
   }

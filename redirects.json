@@ -27,21 +27,19 @@
     },
     "Project": {
       "/w/nl": {
-        "type": "prefix",
+        "type": "proxy",
         "appendPath": true,
-        "status": 302,
         "target": "https://neo-life.github.io"
       },
       "/w/nl/pa": {
-        "type": "prefix",
+        "type": "proxy",
         "appendPath": true,
-        "status": 302,
         "target": "https://plugins.astrbot.qzz.io"
       },
       "/w/nl/ab": {
-        "type": "exact",
-        "status": 302,
-        "target": "https://astrbot.qzz.io"
+        "type": "proxy",
+        "target": "https://astrbot.qzz.io",
+        "appendPath": true
       }
     },
     "Others": {

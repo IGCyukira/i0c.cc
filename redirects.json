@@ -26,17 +26,17 @@
       }
     },
     "Project": {
-      "/w/nl": {
+      "/nl": {
         "type": "proxy",
         "appendPath": true,
         "target": "https://neo-life.github.io"
       },
-      "/w/nl/pa": {
+      "/nl/pa": {
         "type": "proxy",
         "appendPath": true,
         "target": "https://plugins.astrbot.qzz.io"
       },
-      "/w/nl/ab": {
+      "/nl/ab": {
         "type": "proxy",
         "target": "https://astrbot.qzz.io",
         "appendPath": true

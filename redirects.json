@@ -28,20 +28,20 @@
     "Project": {
       "/w/nl": {
         "type": "prefix",
-        "target": "https://neo-life.wenturc.com",
         "appendPath": true,
-        "status": 302
+        "status": 302,
+        "target": "https://neo-life.github.io"
       },
       "/w/nl/pa": {
         "type": "prefix",
-        "target": "https://aaaneko.neo-life.wenturc.com",
         "appendPath": true,
-        "status": 302
+        "status": 302,
+        "target": "https://plugins.astrbot.qzz.io"
       },
       "/w/nl/ab": {
         "type": "exact",
-        "target": "https://cbblover.neo-life.wenturc.com",
-        "status": 302
+        "status": 302,
+        "target": "https://astrbot.qzz.io"
       }
     },
     "Others": {

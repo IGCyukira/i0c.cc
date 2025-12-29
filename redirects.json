@@ -27,7 +27,7 @@
     },
     "Project": {
       "/nl": {
-        "type": "proxy",
+        "type": "prefix",
         "appendPath": true,
         "target": "https://neo-life.github.io"
       }

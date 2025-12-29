@@ -31,10 +31,8 @@
 ## SEO 配置
 
 - `ROBOTS_POLICY`：控制 `robots.txt` 的策略。
-  - `allow`：生成 `Allow: /` 并包含 `Sitemap`。
-  - 默认或其他值：输出 `Disallow: /` 并省略 `Sitemap`。
-  - 当 `ROBOTS_POLICY=allow` 时，运行时会生成包含 `Allow: /` 的 `robots.txt` 文件，并在其中添加指向 `/sitemap.xml` 的 `Sitemap` 条目。
-  - 对于其他值或未设置时，运行时会在 `robots.txt` 中生成 `Disallow: /`，并禁用 `sitemap.xml` 端点。
+  - 设为 `allow`：生成 `Allow: /` 并包含 `Sitemap.xml`。
+  - 设为 默认或其他值：输出 `Disallow: /` 并省略 `Sitemap.xml`。
 
 ## 配置重定向数据源
 

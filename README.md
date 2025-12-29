@@ -31,10 +31,8 @@ Need a custom runtime? Import `handleRedirectRequest` from [src/lib/handler.ts](
 ## SEO Configuration
 
 - `ROBOTS_POLICY`: Controls the `robots.txt` policy.
-  - `allow`: Generates `Allow: /` and includes `Sitemap`.
-  - Default or other values: Outputs `Disallow: /` and omits `Sitemap`.
-  - When `ROBOTS_POLICY=allow`, the runtime generates a `robots.txt` file with `Allow: /` and includes a `Sitemap` entry pointing to `/sitemap.xml`.
-  - For other values or when unset, the runtime generates `Disallow: /` in `robots.txt` and disables the `sitemap.xml` endpoint.
+  - Set to `allow`: Generates `Allow: /` and includes `Sitemap.xml`.
+  - Set to default or other values: Outputs `Disallow: /` and omits `Sitemap.xml`.
 
 ## Configure the redirects source
 

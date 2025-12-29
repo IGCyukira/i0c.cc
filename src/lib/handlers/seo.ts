@@ -26,7 +26,7 @@ export function resolveRobotsPolicy(bindings?: Record<string, unknown>): string 
 
 export function isRobotsAllowed(bindings?: Record<string, unknown>): boolean {
   const policy = resolveRobotsPolicy(bindings)?.toLowerCase();
-  return policy === "allow"; // default deny
+  return policy === "allow"; 
 }
 
 export function generateRobots(origin: string, bindings?: Record<string, unknown>): string {
@@ -44,6 +44,7 @@ export function generateRobots(origin: string, bindings?: Record<string, unknown
 export function generateSitemapXml(origin: string, rulesIn: Record<string, RouteValueEntry>): string {
   const compiled = buildCompiledList(rulesIn);
   const urls = new Set<string>();
+  const nowIso = new Date().toISOString();
 
   for (const item of compiled) {
     if (item.isParam) continue;
@@ -52,7 +53,15 @@ export function generateSitemapXml(origin: string, rulesIn: Record<string, Route
     urls.add(`${origin.replace(/\/$/, "")}${path}`);
   }
 
-  const urlEntries = Array.from(urls).map(u => `  <url>\n    <loc>${escapeXml(u)}</loc>\n  </url>`).join("\n");
+  const urlEntries = Array.from(urls)
+    .map((u) => {
+      const isRoot = u.endsWith("/");
+      const changefreq = isRoot ? "daily" : "weekly";
+      const priority = isRoot ? "1.0" : "0.5";
+
+      return `  <url>\n    <loc>${escapeXml(u)}</loc>\n    <lastmod>${nowIso}</lastmod>\n    <changefreq>${changefreq}</changefreq>\n    <priority>${priority}</priority>\n  </url>`;
+    })
+    .join("\n");
 
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urlEntries}\n</urlset>`;
 }

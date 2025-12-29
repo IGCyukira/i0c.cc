@@ -30,16 +30,6 @@
         "type": "proxy",
         "appendPath": true,
         "target": "https://neo-life.github.io"
-      },
-      "/nl/pa": {
-        "type": "proxy",
-        "appendPath": true,
-        "target": "https://plugins.astrbot.qzz.io"
-      },
-      "/nl/ab": {
-        "type": "proxy",
-        "target": "https://astrbot.qzz.io",
-        "appendPath": true
       }
     },
     "Others": {
@@ -72,26 +62,6 @@
         "appendPath": true,
         "status": "302",
         "target": "https://n.revaea.com"
-      }
-    },
-    "API": {
-      "/_nuxt/*": {
-        "type": "proxy",
-        "appendPath": true,
-        "target": "https://plugins.astrbot.qzz.io/_nuxt/$1",
-        "priority": "10"
-      },
-      "/_next/*": {
-        "type": "proxy",
-        "appendPath": true,
-        "target": "https://astrbot.qzz.io/_next/$1",
-        "priority": "10"
-      },
-      "/api/plugins*": {
-        "type": "proxy",
-        "appendPath": true,
-        "target": "https://plugins.astrbot.qzz.io/api/plugins$1",
-        "priority": "10"
       }
     }
   }

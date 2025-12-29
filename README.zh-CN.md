@@ -26,15 +26,15 @@
 
 需要自定义运行时？可从 [src/lib/handler.ts](src/lib/handler.ts) 引入 `handleRedirectRequest`，再配合 `HandlerOptions`（例如替换配置地址或注入自定义缓存实现）。
 
-## 配置
+## 环境变量与配置
 
-## SEO 配置
+### SEO 配置
 
 - `ROBOTS_POLICY`：控制 `robots.txt` 的策略。
   - 设为 `allow`：生成 `Allow: /` 并包含 `Sitemap.xml`。
   - 设为 默认或其他值：输出 `Disallow: /` 并省略 `Sitemap.xml`。
 
-## 配置重定向数据源
+### 配置重定向数据源
 
 无需改代码即可切换 `redirects.json` 的来源。只要在部署环境里设置以下任意变量即可，Cloudflare（Worker bindings）和 Vercel（process.env）都会被自动识别：
 
@@ -45,7 +45,7 @@
 
 如果提供了仓库 / 分支 / 路径，运行时会自动拼出 raw.githubusercontent.com 地址。未设置任何变量时，默认值仍为仓库 `IGCyukira/i0c.cc`、分支 `data`、文件 `redirects.json`。
 
-# `redirects.json` 配置速查
+### `redirects.json` 配置速查
 
 现在可以部署[面板](https://github.com/IGCyukira/i0c.cc-webui)从而方便在线编辑 `redirects.json` 了。
 
@@ -76,7 +76,7 @@
 
 ```
 
-## 示例 `redirects.json`
+#### 示例 `redirects.json`
 
 ```jsonc
 {

@@ -26,15 +26,15 @@ After deploying:
 
 Need a custom runtime? Import `handleRedirectRequest` from [src/lib/handler.ts](src/lib/handler.ts) and call it with your own `Request` object plus optional `HandlerOptions` (for example, to override the config URL or provide a custom cache implementation).
 
-## Configuration
+## Environment Variables and Configuration
 
-## SEO Configuration
+### SEO Configuration
 
 - `ROBOTS_POLICY`: Controls the `robots.txt` policy.
   - Set to `allow`: Generates `Allow: /` and includes `Sitemap.xml`.
   - Set to default or other values: Outputs `Disallow: /` and omits `Sitemap.xml`.
 
-## Configure the redirects source
+### Configure the redirects source
 
 You can override the default GitHub location without touching the code. Set any of the environment variables below; the runtime will pick them up automatically on Cloudflare (Worker bindings) or Vercel (process.env).
 
@@ -45,7 +45,7 @@ You can override the default GitHub location without touching the code. Set any 
 
 If repo, branch, or path are provided (with or without a direct URL), the handler automatically constructs the raw GitHub URL. With no environment overrides, the defaults remain `IGCyukira/i0c.cc`, branch `data`, file `redirects.json`.
 
-# `redirects.json` Quick Reference
+### `redirects.json` Quick Reference
 
 You can also deploy the [WebUI panel](https://github.com/IGCyukira/i0c.cc-webui) to edit `redirects.json` online.
 
@@ -76,7 +76,7 @@ Tip: add the schema reference below to unlock autocomplete and validation in sup
 
 ```
 
-## Sample `redirects.json`
+#### Sample `redirects.json`
 
 ```jsonc
 {

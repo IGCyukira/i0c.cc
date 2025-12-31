@@ -4,7 +4,7 @@
     "Main": {
       "/": {
         "type": "proxy",
-        "appendPath": false,
+        "appendPath": true,
         "target": "https://api.revaea.com"
       },
       "/r": {

@@ -34,54 +34,93 @@ export async function respondUsingRule(
 }
 
 export async function proxyRequest(
-  request: Request, 
-  targetUrl: string, 
+  request: Request,
+  targetUrl: string,
   runtime: ResolvedRuntime,
   basePath: string = ""
 ): Promise<Response> {
-  const headers = new Headers(request.headers);
-  const targetUrlObj = new URL(targetUrl);
   const originalHost = request.headers.get("host") ?? "";
+  const originalUrl = new URL(request.url);
+  const targetUrlObj = new URL(targetUrl);
 
-  headers.delete("host");
-
-  if (headers.has("origin")) {
-    headers.set("origin", targetUrlObj.origin);
+  const MAX_REDIRECTS = 5;
+  let currentTarget = targetUrl;
+  let redirectCount = 0;
+  let lastResponse: Response | null = null;
+  let bodyBuffer: ArrayBuffer | undefined;
+  const originalMethod = request.method.toUpperCase();
+  if (originalMethod !== "GET" && originalMethod !== "HEAD" && request.body) {
+    bodyBuffer = await request.arrayBuffer();
   }
-  if (headers.has("referer")) {
-    headers.set("referer", targetUrl);
+
+  let effectiveMethod = originalMethod;
+
+  while (redirectCount <= MAX_REDIRECTS) {
+    const headers = new Headers(request.headers);
+    const currentUrlObj = new URL(currentTarget);
+
+    headers.delete("host");
+    headers.set("x-forwarded-host", request.headers.get("host") ?? "");
+    headers.set("x-forwarded-proto", "https");
+    headers.delete("cf-connecting-ip");
+    headers.delete("cf-ipcountry");
+    headers.delete("cf-ray");
+    headers.delete("cf-visitor");
+
+    headers.set("origin", currentUrlObj.origin);
+    headers.set("referer", currentTarget);
+
+    let forwardBody: BodyInit | null = null;
+    if (effectiveMethod !== "GET" && effectiveMethod !== "HEAD" && bodyBuffer) {
+      forwardBody = bodyBuffer;
+    }
+
+    const forwarded = new Request(currentTarget, {
+      method: effectiveMethod,
+      headers,
+      body: forwardBody,
+      redirect: "manual"
+    });
+
+    try {
+      lastResponse = await runtime.fetchImpl(forwarded);
+    } catch (e) {
+      console.error(`Proxy fetch failed for ${currentTarget}:`, e);
+      return new Response("Bad Gateway: Upstream fetch failed.", { status: 502 });
+    }
+
+    const status = lastResponse.status;
+    if (status >= 300 && status < 400) {
+      const location = lastResponse.headers.get("Location");
+      if (!location) break;
+
+      const nextUrl = new URL(location, currentUrlObj).toString();
+
+      if (status === 301 || status === 302 || status === 303) {
+        effectiveMethod = "GET";
+      }
+
+      currentTarget = nextUrl;
+      redirectCount += 1;
+      continue;
+    }
+
+    break;
   }
 
-  headers.set("x-forwarded-host", originalHost);
-  headers.set("x-forwarded-proto", "https"); 
-  headers.delete("cf-connecting-ip");
-  headers.delete("cf-ipcountry");
-  headers.delete("cf-ray");
-  headers.delete("cf-visitor");
-
-  const forwarded = new Request(targetUrl, {
-    method: request.method,
-    headers,
-    body: request.body,
-    redirect: "manual" 
-  });
-
-  let response: Response;
-  try {
-    response = await runtime.fetchImpl(forwarded);
-  } catch (e) {
-    console.error(`Proxy fetch failed for ${targetUrl}:`, e);
-    return new Response("Bad Gateway: Failed to fetch from upstream.", { status: 502 });
+  if (!lastResponse) {
+    return new Response("Gateway Timeout", { status: 504 });
   }
-  
-  const responseHeaders = new Headers(response.headers);
 
-  responseHeaders.set("x-upstream-status", String(response.status));
-  responseHeaders.set("x-upstream-location", response.headers.get("Location") ?? "null");
+  const responseHeaders = new Headers(lastResponse.headers);
+
+  responseHeaders.set("x-upstream-status", String(lastResponse.status));
+  responseHeaders.set("x-upstream-location", lastResponse.headers.get("Location") ?? "");
+  responseHeaders.set("x-proxy-redirects-followed", String(redirectCount));
 
   responseHeaders.delete("content-security-policy");
   responseHeaders.delete("content-security-policy-report-only");
-  responseHeaders.delete("x-frame-options"); 
+  responseHeaders.delete("x-frame-options");
   responseHeaders.set("Strict-Transport-Security", HSTS_HEADER_VALUE);
 
   const setCookie = responseHeaders.get("set-cookie");
@@ -95,26 +134,14 @@ export async function proxyRequest(
     let finalLocation = location;
 
     try {
-      const locUrl = new URL(location, targetUrlObj);
-      
-      if (locUrl.origin === targetUrlObj.origin || location.startsWith("/")) {
-        
-        const rewrittenUrl = new URL(request.url);
-        
-        rewrittenUrl.pathname = locUrl.pathname;
-        rewrittenUrl.search = locUrl.search;
-        rewrittenUrl.hash = locUrl.hash;
-
-        const rewrittenString = rewrittenUrl.toString();
-
-        if (rewrittenString === request.url) {
-          finalLocation = locUrl.toString(); 
-        } else {
-          finalLocation = rewrittenString;
-        }
+      const locUrl = new URL(location, currentTarget);
+      if (locUrl.origin === targetUrlObj.origin && originalHost) {
+        const rewritten = `https://${originalHost}${locUrl.pathname}${locUrl.search}`;
+        finalLocation = rewritten !== originalUrl.href ? rewritten : locUrl.toString();
+      } else {
+        finalLocation = locUrl.toString();
       }
-    } catch (e) {
-      console.warn("Error rewriting location:", e);
+    } catch {
     }
 
     if (basePath && basePath !== "/" && finalLocation.startsWith("/") && !finalLocation.startsWith("//")) {
@@ -124,8 +151,8 @@ export async function proxyRequest(
     responseHeaders.set("Location", finalLocation);
   }
 
-  return new Response(response.body, {
-    status: response.status,
+  return new Response(lastResponse.body, {
+    status: lastResponse.status,
     headers: responseHeaders
   });
 }

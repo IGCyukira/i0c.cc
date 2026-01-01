@@ -30,6 +30,11 @@
         "type": "prefix",
         "appendPath": true,
         "target": "https://neo-life.github.io"
+      },
+      "/nl/pa": {
+        "type": "proxy",
+        "appendPath": true,
+        "target": "https://pa.i0c.cc"
       }
     },
     "Others": {

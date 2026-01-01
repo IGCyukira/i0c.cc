@@ -93,21 +93,29 @@ export async function proxyRequest(
 
   const location = responseHeaders.get("Location");
   if (location) {
-    // 如果上游 Location 是指向 api.revaea.com 的绝对地址，改写为当前请求域名，路径保持不变
+    let finalLocation = location;
+
     try {
       const locUrl = new URL(location, targetUrlObj);
       if (locUrl.origin === targetUrlObj.origin && originalHost) {
         const rewritten = `https://${originalHost}${locUrl.pathname}${locUrl.search}`;
-        responseHeaders.set("Location", rewritten);
+
+        if (rewritten !== request.url) {
+          finalLocation = rewritten;
+        } else {
+          finalLocation = locUrl.toString();
+        }
+      } else {
+        finalLocation = locUrl.toString();
       }
     } catch {
-      // 无法解析为 URL 时，保持原样
     }
 
-    const finalLocation = responseHeaders.get("Location") ?? location;
     if (basePath && basePath !== "/" && finalLocation.startsWith("/") && !finalLocation.startsWith("//")) {
-      responseHeaders.set("Location", `${basePath}${finalLocation}`);
+      finalLocation = `${basePath}${finalLocation}`;
     }
+
+    responseHeaders.set("Location", finalLocation);
   }
 
   return new Response(response.body, {

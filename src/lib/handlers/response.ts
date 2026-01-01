@@ -41,6 +41,7 @@ export async function proxyRequest(
 ): Promise<Response> {
   const headers = new Headers(request.headers);
   const targetUrlObj = new URL(targetUrl);
+  const originalHost = request.headers.get("host") ?? "";
 
   headers.delete("host");
 
@@ -87,8 +88,23 @@ export async function proxyRequest(
   }
 
   const location = responseHeaders.get("Location");
-  if (location && basePath && basePath !== "/" && location.startsWith("/") && !location.startsWith("//")) {
-    responseHeaders.set("Location", `${basePath}${location}`);
+  if (location) {
+    const targetOrigin = targetUrlObj.origin;
+
+    try {
+      const locUrl = new URL(location, targetOrigin);
+
+      if (locUrl.origin === targetOrigin && originalHost) {
+        const prefix = `https://${originalHost}`;
+        const pathWithQuery = `${locUrl.pathname}${locUrl.search}`;
+        responseHeaders.set("Location", `${prefix}${pathWithQuery}`);
+      }
+    } catch {
+    }
+
+    if (basePath && basePath !== "/" && location.startsWith("/") && !location.startsWith("//")) {
+      responseHeaders.set("Location", `${basePath}${location}`);
+    }
   }
 
   return new Response(response.body, {

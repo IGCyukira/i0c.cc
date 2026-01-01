@@ -52,8 +52,8 @@ export async function proxyRequest(
     headers.set("referer", targetUrl);
   }
 
-  headers.set("x-forwarded-host", request.headers.get("host") ?? "");
-  headers.set("x-forwarded-proto", "https");
+  headers.set("x-forwarded-host", originalHost);
+  headers.set("x-forwarded-proto", "https"); 
   headers.delete("cf-connecting-ip");
   headers.delete("cf-ipcountry");
   headers.delete("cf-ray");
@@ -76,9 +76,8 @@ export async function proxyRequest(
   
   const responseHeaders = new Headers(response.headers);
 
-  // 调试：记录上游状态码与原始 Location
   responseHeaders.set("x-upstream-status", String(response.status));
-  responseHeaders.set("x-upstream-location", response.headers.get("Location") ?? "");
+  responseHeaders.set("x-upstream-location", response.headers.get("Location") ?? "null");
 
   responseHeaders.delete("content-security-policy");
   responseHeaders.delete("content-security-policy-report-only");
@@ -97,18 +96,25 @@ export async function proxyRequest(
 
     try {
       const locUrl = new URL(location, targetUrlObj);
-      if (locUrl.origin === targetUrlObj.origin && originalHost) {
-        const rewritten = `https://${originalHost}${locUrl.pathname}${locUrl.search}`;
+      
+      if (locUrl.origin === targetUrlObj.origin || location.startsWith("/")) {
+        
+        const rewrittenUrl = new URL(request.url);
+        
+        rewrittenUrl.pathname = locUrl.pathname;
+        rewrittenUrl.search = locUrl.search;
+        rewrittenUrl.hash = locUrl.hash;
 
-        if (rewritten !== request.url) {
-          finalLocation = rewritten;
+        const rewrittenString = rewrittenUrl.toString();
+
+        if (rewrittenString === request.url) {
+          finalLocation = locUrl.toString(); 
         } else {
-          finalLocation = locUrl.toString();
+          finalLocation = rewrittenString;
         }
-      } else {
-        finalLocation = locUrl.toString();
       }
-    } catch {
+    } catch (e) {
+      console.warn("Error rewriting location:", e);
     }
 
     if (basePath && basePath !== "/" && finalLocation.startsWith("/") && !finalLocation.startsWith("//")) {

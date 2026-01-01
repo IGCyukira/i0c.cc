@@ -27,8 +27,7 @@
     },
     "Project": {
       "/nl": {
-        "type": "prefix",
-        "appendPath": true,
+        "type": "exact",
         "target": "https://neo-life.github.io"
       },
       "/nl/pa": {

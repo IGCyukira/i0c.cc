@@ -82,11 +82,16 @@ export async function handleRedirectRequest(request: Request, options: HandlerOp
     
     const compiledList = buildCompiledList(rawRules);
     const decodedPath = safeDecode(path);
-    const tasks: Promise<Response>[] = [];
 
-    for (const item of compiledList) {
+    // 静态资源判定
+    const isStaticAssetPath =
+      /(?:^|\/)(_next|_nuxt)(?:\/|$)/.test(decodedPath) ||
+      /(?:^|\/)(assets|static|images|img|fonts)(?:\/|$)/i.test(decodedPath) ||
+      /\.(?:js|mjs|css|map|png|jpe?g|gif|webp|svg|ico|woff2?|ttf|otf|eot)$/i.test(decodedPath);
+
+    for (let index = 0; index < compiledList.length; index += 1) {
+      const item = compiledList[index];
       const { rule, regex, names, isParam, base } = item;
-      
       if (!rule.target) continue;
 
       let targetUrl: string | null = null;
@@ -99,28 +104,71 @@ export async function handleRedirectRequest(request: Request, options: HandlerOp
         targetUrl = resolvePrefixTarget(decodedPath, url.search, rule, base);
       }
 
-      if (targetUrl) {
-        const reqClone = request.clone() as Request;
-        const task = async () => {
-          const response = await respondUsingRule(reqClone, rule, targetUrl!, runtime, base);
+      if (!targetUrl) continue;
 
-          if (rule.type === "proxy") {
-            if (response.status === 404) {
-              throw new Error(`[Proxy] 404 Not Found from ${targetUrl}`);
-            }
-            if (response.status >= 500) {
-              throw new Error(`[Proxy] Upstream Error ${response.status} from ${targetUrl}`);
-            }
+      if (isStaticAssetPath && rule.type === "proxy") {
+        const candidates: Array<{ base: string; rule: typeof rule; targetUrl: string }> = [{ base, rule, targetUrl }];
+        let scan = index + 1;
+
+        while (scan < compiledList.length) {
+          const next = compiledList[scan];
+          if (next.base !== base) break;
+          if (!next.rule.target) {
+            scan += 1;
+            continue;
           }
-          
-          return response;
-        };
 
-        tasks.push(task());
+          let nextTarget: string | null = null;
+          const nextMatch = decodedPath.match(next.regex);
+          if (nextMatch) {
+            const resolved = applyTemplate(next.rule.target, nextMatch, next.names);
+            nextTarget = appendOriginalQuery(resolved, url.search);
+          } else if ((next.rule.type === "prefix" || next.rule.type === "proxy") && !next.isParam) {
+            nextTarget = resolvePrefixTarget(decodedPath, url.search, next.rule, next.base);
+          }
+
+          if (nextTarget && next.rule.type === "proxy") {
+            candidates.push({ base: next.base, rule: next.rule, targetUrl: nextTarget });
+          }
+
+          scan += 1;
+        }
+
+        if (candidates.length > 1) {
+          const tasks = candidates.map(({ rule, targetUrl, base }) => {
+            const reqClone = request.clone() as Request;
+            return (async () => {
+              const response = await respondUsingRule(reqClone, rule, targetUrl, runtime, base);
+              if (response.status === 404) throw new Error("proxy 404");
+              if (response.status >= 500) throw new Error(`proxy ${response.status}`);
+              return response;
+            })();
+          });
+
+          try {
+            const raced = await Promise.any(tasks);
+            return raced;
+          } catch {
+            index = scan - 1;
+            continue;
+          }
+        }
+
+        index = scan - 1;
       }
+
+      const reqClone = request.clone() as Request;
+      const response = await respondUsingRule(reqClone, rule, targetUrl, runtime, base);
+
+      if (rule.type === "proxy") {
+        if (response.status === 404) continue;
+        if (response.status >= 500) continue;
+      }
+
+      return response;
     }
 
-    if (tasks.length === 0) {
+    {
       return new Response(notFoundPageHtml, {
         status: 404,
         headers: {
@@ -130,17 +178,6 @@ export async function handleRedirectRequest(request: Request, options: HandlerOp
       });
     }
 
-    try {
-      return await Promise.any(tasks);
-    } catch (aggregateError) {
-      return new Response(notFoundPageHtml, {
-        status: 404,
-        headers: {
-          "Content-Type": "text/html; charset=utf-8",
-          "Cache-Control": "public, max-age=60"
-        }
-      });
-    }
 
   } catch (error) {
     console.error("[Handler Critical Error]", error);

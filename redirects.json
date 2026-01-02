@@ -27,7 +27,7 @@
     },
     "Project": {
       "/nl": {
-        "type": "prefix",
+        "type": "exact",
         "target": "https://neo-life.github.io",
         "status": "302"
       },

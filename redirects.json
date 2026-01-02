@@ -28,10 +28,11 @@
     "Project": {
       "/nl": {
         "type": "exact",
-        "target": "https://neo-life.github.io"
+        "target": "https://neo-life.github.io",
+        "status": "302"
       },
       "/nl/pa": {
-        "type": "proxy",
+        "type": "prefix",
         "appendPath": true,
         "target": "https://pa.i0c.cc"
       }

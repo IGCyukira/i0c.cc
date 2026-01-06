@@ -35,6 +35,10 @@
         "type": "prefix",
         "appendPath": true,
         "target": "https://pa.i0c.cc"
+      },
+      "/nl/ab": {
+        "type": "exact",
+        "target": "https://github.com/Neo-Life/CBB_Lover"
       }
     },
     "Others": {

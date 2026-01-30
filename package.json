@@ -5,7 +5,12 @@
   "pnpm": {
     "overrides": {
       "@vercel/fun>tar": "7.5.7",
-      "@vercel/node>undici": "5.29.0",
+      "@vercel/fun>path-to-regexp": "8.3.0",
+      "@vercel/node>path-to-regexp": "6.3.0",
+      "@vercel/remix-builder>path-to-regexp": "6.3.0",
+      "@vercel/node>undici": "7.19.2",
+      "@vercel/blob>undici": "7.19.2",
+      "miniflare>undici": "7.19.2",
       "tar": "7.5.7",
       "qs": "6.14.1"
     }

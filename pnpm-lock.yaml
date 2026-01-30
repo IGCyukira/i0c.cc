@@ -6,7 +6,12 @@ settings:
 
 overrides:
   '@vercel/fun>tar': 7.5.7
-  '@vercel/node>undici': 5.29.0
+  '@vercel/fun>path-to-regexp': 8.3.0
+  '@vercel/node>path-to-regexp': 6.3.0
+  '@vercel/remix-builder>path-to-regexp': 6.3.0
+  '@vercel/node>undici': 7.19.2
+  '@vercel/blob>undici': 7.19.2
+  miniflare>undici: 7.19.2
   tar: 7.5.7
   qs: 6.14.1
 
@@ -434,10 +439,6 @@ packages:
     engines: {node: '>=18'}
     cpu: [x64]
     os: [win32]
-
-  '@fastify/busboy@2.1.1':
-    resolution: {integrity: sha512-vBZP4NlzfOlerQTnba4aqZoMhE/a9HY7HRqoOPaETQcSQuWEIyZMHGfVu6w9wGtGK5fED5qRs2DteVCjOH60sA==}
-    engines: {node: '>=14'}
 
   '@iarna/toml@2.2.5':
     resolution: {integrity: sha512-trnsAYxU3xnS1gPHPyU961coFyLkh4gAD/0zQ5mymY4yOZ+CYvsPqUbOFSw0aDM4y0tV7tiFxL/1XfXPNC6IPg==}
@@ -1682,15 +1683,8 @@ packages:
     resolution: {integrity: sha512-oWyT4gICAu+kaA7QWk/jvCHWarMKNs6pXOGWKDTr7cw4IGcUbW+PeTfbaQiLGheFRpjo6O9J0PmyMfQPjH71oA==}
     engines: {node: 20 || >=22}
 
-  path-to-regexp@6.1.0:
-    resolution: {integrity: sha512-h9DqehX3zZZDCEm+xbfU0ZmwCGFCAAraPJWMXJ4+v32NjZJilVg3k1TcKsRgIb8IQ/izZSaydDc1OhJCZvs2Dw==}
-
   path-to-regexp@6.3.0:
     resolution: {integrity: sha512-Yhpw4T9C6hPpgPeA28us07OJeqZ5EzQTkbfwuhsUg0c237RomFoETJgmp2sa3F/41gfLE6G5cqcYwznmeEeOlQ==}
-
-  path-to-regexp@8.2.0:
-    resolution: {integrity: sha512-TdrF7fW9Rphjq4RjrW0Kp2AW0Ahwu9sRGTkS6bvDi0SCwZlEZYmcfDbEsTz8RVk0EHIS/Vd1bv3JhG+1xZuAyQ==}
-    engines: {node: '>=16'}
 
   path-to-regexp@8.3.0:
     resolution: {integrity: sha512-7jdwVIRtsP8MYpdXSwOS0YdD0Du+qOoF/AEPIt88PcCFrZCzx41oxku1jD88hZBwbNUIEfpqvuhjFaMAqMTWnA==}
@@ -2012,12 +2006,8 @@ packages:
   undici-types@5.26.5:
     resolution: {integrity: sha512-JlCMO+ehdEIKqlFxk6IfVoAUVmgz7cU7zD/h9XZ0qzeosSHmUJVOzSQvvYSYWXkFXC+IfLKSIffhv0sVZup6pA==}
 
-  undici@5.29.0:
-    resolution: {integrity: sha512-raqeBD6NQK4SkWhQzeYKd1KmIG6dllBOTt55Rmkt4HtI9mwdWtJljnrXjAFUBLTSN67HWrOIZ3EPF4kjUw80Bg==}
-    engines: {node: '>=14.0'}
-
-  undici@7.18.2:
-    resolution: {integrity: sha512-y+8YjDFzWdQlSE9N5nzKMT3g4a5UBX1HKowfdXh0uvAnTaqqwqB92Jt4UXBAeKekDs5IaDKyJFR4X1gYVCgXcw==}
+  undici@7.19.2:
+    resolution: {integrity: sha512-4VQSpGEGsWzk0VYxyB/wVX/Q7qf9t5znLRgs0dzszr9w9Fej/8RVNQ+S20vdXSAyra/bJ7ZQfGv6ZMj7UEbzSg==}
     engines: {node: '>=20.18.1'}
 
   unenv@2.0.0-rc.24:
@@ -2369,8 +2359,6 @@ snapshots:
 
   '@esbuild/win32-x64@0.27.2':
     optional: true
-
-  '@fastify/busboy@2.1.1': {}
 
   '@iarna/toml@2.2.5': {}
 
@@ -2726,7 +2714,7 @@ snapshots:
       is-buffer: 2.0.5
       is-node-process: 1.2.0
       throttleit: 2.1.0
-      undici: 5.29.0
+      undici: 7.19.2
 
   '@vercel/build-utils@13.2.16': {}
 
@@ -2791,7 +2779,7 @@ snapshots:
       micro: 9.3.5-canary.3
       ms: 2.1.1
       node-fetch: 2.6.7
-      path-to-regexp: 8.2.0
+      path-to-regexp: 8.3.0
       promisepipe: 3.0.0
       semver: 7.5.4
       stat-mode: 0.3.0
@@ -2924,13 +2912,13 @@ snapshots:
       etag: 1.8.1
       mime-types: 2.1.35
       node-fetch: 2.6.9
-      path-to-regexp: 6.1.0
+      path-to-regexp: 6.3.0
       path-to-regexp-updated: path-to-regexp@6.3.0
       ts-morph: 12.0.0
       ts-node: 10.9.1(@types/node@20.11.0)(typescript@4.9.5)
       typescript: 4.9.5
       typescript5: typescript@5.9.3
-      undici: 5.29.0
+      undici: 7.19.2
     transitivePeerDependencies:
       - '@swc/core'
       - '@swc/wasm'
@@ -2956,7 +2944,7 @@ snapshots:
       '@vercel/error-utils': 2.0.3
       '@vercel/nft': 1.1.1(rollup@4.57.1)
       '@vercel/static-config': 3.1.2
-      path-to-regexp: 6.1.0
+      path-to-regexp: 6.3.0
       path-to-regexp-updated: path-to-regexp@6.3.0
       ts-morph: 12.0.0
     transitivePeerDependencies:
@@ -3515,7 +3503,7 @@ snapshots:
     dependencies:
       '@cspotcode/source-map-support': 0.8.1
       sharp: 0.34.5
-      undici: 7.18.2
+      undici: 7.19.2
       workerd: 1.20260128.0
       ws: 8.18.0
       youch: 4.1.0-beta.10
@@ -3621,11 +3609,7 @@ snapshots:
       lru-cache: 11.2.5
       minipass: 7.1.2
 
-  path-to-regexp@6.1.0: {}
-
   path-to-regexp@6.3.0: {}
-
-  path-to-regexp@8.2.0: {}
 
   path-to-regexp@8.3.0: {}
 
@@ -3970,11 +3954,7 @@ snapshots:
 
   undici-types@5.26.5: {}
 
-  undici@5.29.0:
-    dependencies:
-      '@fastify/busboy': 2.1.1
-
-  undici@7.18.2: {}
+  undici@7.19.2: {}
 
   unenv@2.0.0-rc.24:
     dependencies:

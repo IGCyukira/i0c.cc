@@ -21,10 +21,10 @@
     "@cloudflare/workers-types": "^4.20251213.0",
     "@esbuild-plugins/tsconfig-paths": "^0.1.2",
     "concurrently": "^9.2.1",
-    "netlify-cli": "^23.12.3",
+    "netlify-cli": "^23.14.0",
     "tsup": "^8.5.1",
     "typescript": "^5.9.3",
-    "vercel": "^50.0.1",
-    "wrangler": "^4.59.1"
+    "vercel": "^50.9.5",
+    "wrangler": "^4.61.1"
   }
 }
